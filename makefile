@@ -1,7 +1,7 @@
-LIBS = -lpthread -lm
+LIBS = -lthreads -lm
 
 CC = gcc
-CFLAGS = -c
+CFLAGS = -std=c11 -c
 
 all: main.o logging.o connection.o player.o
 	$(CC) main.o logging.o player.o connection.o -o microMC $(LIBS)

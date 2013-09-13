@@ -6,10 +6,10 @@
 #include <string.h>
 #include <netdb.h>
 
-#include <pthread.h>
+#include <threads.h>
 #include "logging.h"
 #include "connection.h"
-
+#include "fcntl.h"
 #define PORT "1234"
 #define CONNECTION_BACKLOG 10
 int main(){
@@ -29,6 +29,7 @@ int main(){
     getaddrinfo(NULL, PORT, &hints, &res);
 
     int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    //fcntl(sockfd, F_SETFL, O_NONBLOCK);
     int binderr = bind(sockfd, res->ai_addr, res->ai_addrlen);
     if (binderr == -1){
 	logmsg(LOG_ERROR, "Unable to bind socket!");
@@ -42,19 +43,17 @@ int main(){
 	new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
 	
 	logmsg(LOG_INFO, "Accepted connection. Starting new thread!");
-	pthread_t *thread;
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	pthread_create(thread, &attr, &connection_thread, &new_fd);
-	pthread_attr_destroy(&attr);
+	thrd_t *thread;
+	thrd_create(thread, &connection_thread, &new_fd);
+	
 	
 	logmsg(LOG_INFO, "Waiting for thread to join.");
-	pthread_join(*thread, NULL);
+	thrd_join(*thread, NULL);
 	
 	break; // TODO remove
     }
     logmsg(LOG_INFO, "Closing main socket.");
     close(sockfd);
     logmsg(LOG_INFO, "Closing!");
+    return 0;
 }

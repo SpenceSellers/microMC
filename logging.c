@@ -1,6 +1,8 @@
 #include "logging.h"
 
-pthread_mutex_t log_mutex;
+#include <threads.h>
+
+mtx log_mutex;
 
 
 void logmsg(int level, char *message){
@@ -27,5 +29,5 @@ void logmsg(int level, char *message){
 }
 
 void logging_init(){
-    pthread_mutex_init(&log_mutex, NULL);
+    mtx_init(&log_mutex, mtx_plain);
 }
