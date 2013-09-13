@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <pthread.h>
 
 #define LOG_ERROR 0 // Critical Failures, or impending critical failures.
 #define LOG_WARN 1 // Things which could create a problem
@@ -14,4 +15,5 @@
 
 void logmsg(int level, char *message); 
 
+void logging_init();
 #endif
