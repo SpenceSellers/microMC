@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS = -c
 
 all: main.o logging.o connection.o player.o
-	$(CC) main.o logging.o player.o connection.o -o microMC $(LIBS)
+	$(CC) main.o logging.o player.o connection.o server.c map.c -o microMC $(LIBS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) main.c $(LIBS)
@@ -18,5 +18,10 @@ player.o: player.c
 connection.o: connection.c
 	$(CC) $(CFLAGS) connection.c $(LIBS)
 
+server.o: server.c
+	$(CC) $(CFLAGS) server.c $(LIBS)
+
+map.o: map.c
+	$(CC) $(CFLAGS) map.c $(LIBS)
 clean:
 	rm *.o microMC
