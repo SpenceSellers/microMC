@@ -1,6 +1,8 @@
 #include "connection.h"
 #include "logging.h"
 #include "pthread.h"
+#include "player.h"
+#include "packets.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,13 +25,12 @@ void *connection_thread(void *vsock){
 	    close(*sock);
 	    pthread_exit(NULL);
 	}
-	buffer[read] = 0;
-	printf("Read: %s \n", buffer);
-	if (buffer[0] == 'q'){
-	    logmsg(LOG_INFO, "Recieved a q. Quitting thread.");
-	    close(*sock);
-	    pthread_exit(NULL);
-	}
+	printf("Read %d bytes\n", read);
+	packet_handle02handshake(*sock, buffer, read);
+	close(*sock);
+	pthread_exit(NULL);
+	
+        
     }
 }
 
@@ -84,3 +85,5 @@ void *connection_distributor_thread(void *nothing){
     close(sock);
     pthread_exit(NULL);
 }
+
+    

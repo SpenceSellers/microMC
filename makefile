@@ -3,8 +3,10 @@ LIBS = -lpthread -lm
 CC = gcc
 CFLAGS = -c
 
-all: main.o logging.o connection.o player.o
-	$(CC) main.o logging.o player.o connection.o server.c map.c -o microMC $(LIBS)
+all: main.o logging.o connection.o player.o server.o map.o packets.o
+	$(CC) main.o logging.o player.o connection.o \
+	server.o map.o packets.o \
+	-o microMC $(LIBS)
 
 main.o: main.c
 	$(CC) $(CFLAGS) main.c $(LIBS)
@@ -23,5 +25,9 @@ server.o: server.c
 
 map.o: map.c
 	$(CC) $(CFLAGS) map.c $(LIBS)
+
+packets.o: packets.c
+	$(CC) $(CFLAGS) packets.c $(LIBS)
+
 clean:
 	rm *.o microMC

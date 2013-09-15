@@ -6,6 +6,9 @@
 #include <pthread.h>
 
 typedef struct Server {
+    pthread_rwlock_t running_lock;
+    char isrunning;
+    
     pthread_rwlock_t players_lock;
     PlayerList *players;
     
@@ -14,6 +17,7 @@ typedef struct Server {
 } Server;
 
 Server * Server_create(Map *map);
+
 
 #endif
 
