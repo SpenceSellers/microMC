@@ -42,14 +42,14 @@ struct Packet02Handshake {
 
 struct Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     logmsg(LOG_DEBUG, "Decoding Packet02Handshake");
-
+    size_t pos = 0; //Current parsing position
+    
     if (data[pos] != PACKET_HANDSHAKE){
 	logmsg(LOG_WARN, "This is not a Handshake packet!");
 	return NULL;
     }
-    
+    pos++;
     struct Packet02Handshake *packet = malloc(sizeof(struct Packet02Handshake));
-    size_t pos = 0; //Current parsing position
     size_t read = 0; //Number of bytes last parsed
 
     packet->version = data[pos];
@@ -65,7 +65,6 @@ struct Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     
     return packet;
 }
-    
 Player * packet_handle02handshake(int socket, char *data, size_t length){
     logmsg(LOG_DEBUG, "Handling Packet02Handshake");
     struct Packet02Handshake *packet = Packet02Handshake_parse(data, length);

@@ -11,7 +11,7 @@
 #include <netdb.h>
 #define BUFFERSIZE 1024
 
-#define PORT "1234"
+#define PORT "25565"
 #define CONNECTION_BACKLOG 10
 
 void *connection_thread(void *vsock){
