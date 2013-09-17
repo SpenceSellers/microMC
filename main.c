@@ -10,14 +10,14 @@
 #include "logging.h"
 #include "connection.h"
 
-
 int main(){
     logging_init();
     logmsg(LOG_INFO, "Server started and logging started.");
-
+    
     pthread_t distributor;
     pthread_create(&distributor, NULL, &connection_distributor_thread, NULL);
     pthread_join(distributor, NULL);
     logmsg(LOG_INFO, "Server shutting down!");
     
 }
+
