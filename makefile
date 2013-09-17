@@ -3,7 +3,7 @@ LIBS = -lpthread -lm
 CC = gcc
 CFLAGS = -c
 
-OBJS = main.o logging.o connection.o player.o server.o map.o packets.o
+OBJS = main.o logging.o connection.o player.o server.o map.o packets.o encodings.o
 
 BINARY= microMC
 

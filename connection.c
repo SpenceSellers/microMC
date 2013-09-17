@@ -52,6 +52,8 @@ Player * handle_login(int sock){
     char *data = Packet01LoginRequest_encode(loginreq, &packlen);
     logmsg(LOG_DEBUG, "Sending login request.");
     send(sock, data, packlen, 0);
+
+    return player;
     
 }
 void *connection_thread(void *vsock){

@@ -8,15 +8,6 @@
 #define PACKET_HANDSHAKE 0x02
 #define PACKET_SPAWN_POSITION 0x06
 void debug_print_hex_string(char *str, size_t len);
-char * decode_MCString(char *mcstring, size_t *read);
-
-/*
- *  Encodes an ASCII string into Minecraft's UTF-16BE format.
- *  It has no unicode support at this time.
- */
-char * encode_MCString(char *string, size_t *len);
-
-void write_MCint(int i, char *place, size_t *len);
 
 typedef struct Packet01LoginRequest {
     int entity_id;
