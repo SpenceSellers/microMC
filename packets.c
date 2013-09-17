@@ -143,3 +143,33 @@ void Packet01LoginRequest_free(Packet01LoginRequest *data){
     free(data->level_type);
     free(data);
 }
+
+/*
+ * Packet 0x06 Spawn Position
+ */
+char * Packet06SpawnPosition_encode(Packet06SpawnPosition *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    size_t wrote;
+
+    packet[pos] = PACKET_SPAWN_POSITION;
+    pos++;
+
+    write_MCint(data->x, packet + pos, &wrote);
+    pos += wrote;
+
+    write_MCint(data->y, packet + pos, &wrote);
+    pos += wrote;
+
+    write_MCint(data->z, packet + pos, &wrote);
+    pos += wrote;
+
+    *len = pos;
+    return packet;
+
+}
+
+void Packet06SpawnPosition_free(Packet06SpawnPosition *data){
+    free(data);
+}
+

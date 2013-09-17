@@ -6,6 +6,7 @@
 
 #define PACKET_LOGIN_REQUEST 0x01
 #define PACKET_HANDSHAKE 0x02
+#define PACKET_SPAWN_POSITION 0x06
 void debug_print_hex_string(char *str, size_t len);
 char * decode_MCString(char *mcstring, size_t *read);
 
@@ -37,4 +38,12 @@ typedef struct Packet02Handshake {
 
 Packet02Handshake * Packet02Handshake_parse(char *data, size_t length);
 
+typedef struct Packet06SpawnPosition {
+    int x;
+    int y;
+    int z;
+} Packet06SpawnPosition;
+
+char * Packet06SpawnPosition_encode(Packet06SpawnPosition *data, size_t *len);
+void Packet06SpawnPosition_free(Packet06SpawnPosition *data);
 #endif
