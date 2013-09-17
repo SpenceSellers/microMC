@@ -4,6 +4,7 @@
 #include <string.h>
 #include "logging.h"
 
+#define PACKET_BUFFER_SIZE 2048
 void debug_print_hex_string(char *str, size_t len){
     int i;
     for (i=0; i < len; i++){
@@ -41,8 +42,9 @@ char * decode_MCString(char *mcstring, size_t *read){
     logmsg(LOG_DEBUG, "Done parsing string!");
     return cstring;
 }
-	    
-char * encode_MCString(char *string){
+
+
+char * encode_MCString(char *string, size_t *len){
     logmsg(LOG_DEBUG, "Encoding a MCstring");
     size_t stringlen = strlen(string);
     size_t mcstrlen = (stringlen * 2) + 2; //Plus Two for size short.
@@ -55,17 +57,20 @@ char * encode_MCString(char *string){
 	if (i % 2 == 0) {mcstring[i] = 0;}
 	else { mcstring[i] = string[(i-3)/2];}
     }
+    if (len != NULL){
+	*len = mcstrlen;
+    }
     return mcstring;
 }
 
-struct Packet02Handshake {
-    char version;
-    char *username;
-    char *server_name;
-    int server_port;
-};
+void write_MCint(int i, char *place,  size_t *len){
+    int bige_int = htonl(i);
 
-struct Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
+    *(int*) place = bige_int;
+    *len = 4;
+}
+
+Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     logmsg(LOG_DEBUG, "Decoding Packet02Handshake");
     size_t pos = 0; //Current parsing position
     
@@ -74,7 +79,7 @@ struct Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
 	return NULL;
     }
     pos++;
-    struct Packet02Handshake *packet = malloc(sizeof(struct Packet02Handshake));
+    Packet02Handshake *packet = malloc(sizeof(Packet02Handshake));
     size_t read = 0; //Number of bytes last parsed
 
     packet->version = data[pos];
@@ -97,16 +102,44 @@ void Packet02Handshake_free(struct Packet02Handshake *packet){
     free(packet);
 }
 
-Player * packet_handle02handshake(int socket, char *data, size_t length){
-    logmsg(LOG_DEBUG, "Handling Packet02Handshake");
-    struct Packet02Handshake *packet = Packet02Handshake_parse(data, length);
+// PACKET O1 LOGIN REQUEST
 
-    printf("Version: %d\n", packet->version);
-    printf("Username: %s\n", packet->username);
-    printf("Server Name: %s\n", packet->server_name);
-    printf("server port: %d\n", packet->server_port);
+char * Packet01LoginRequest_encode(Packet01LoginRequest *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    size_t wrote;
+    packet[pos] = PACKET_LOGIN_REQUEST;
+    pos++;
+
+    write_MCint(data->entity_id, packet+pos, &wrote);
+    pos+= wrote;
     
-    Packet02Handshake_free(packet);
-    return NULL;
+    char *mclevelstring = encode_MCString(data->level_type, &wrote);
+    memcpy(packet + pos, mclevelstring, wrote);
+    pos += wrote;
 
+    packet[pos] = data->game_mode;
+    pos++;
+
+    packet[pos] = data->difficulty;
+    pos++;
+
+    /* The minecraft protocol has an unused value here.
+       It used to be world height, but now the vanilla server
+       just sends zero. */
+    packet[pos] = 0;
+    pos++;
+
+    packet[pos] = data->max_players;
+    pos++;
+
+    *len = pos;
+
+    return packet;
+}
+    
+
+void Packet01LoginRequest_free(Packet01LoginRequest *data){
+    free(data->level_type);
+    free(data);
 }

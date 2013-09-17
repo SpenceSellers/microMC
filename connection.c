@@ -14,23 +14,64 @@
 #define PORT "25565"
 #define CONNECTION_BACKLOG 10
 
+Player * handle_login(int sock){
+    logmsg(LOG_DEBUG, "Handling a login...");
+    char buffer[BUFFERSIZE];
+    int read = recv(sock, buffer, BUFFERSIZE, 0);
+    if (read <= 0){
+	logmsg(LOG_INFO, "Socket has been closed!");
+	close(sock);
+	pthread_exit(NULL);
+    }
+    
+    Packet02Handshake *handshake = Packet02Handshake_parse(buffer, read);
+
+    /* Copy username over to the Player struct.
+     * The packet struct's username string will be freed, so
+     * It the pointer can't just be transferred.
+     */
+    size_t username_length = strlen(handshake->username) + 1;
+    char *playername = malloc(sizeof(char) * username_length);
+    memcpy(playername, handshake->username, username_length);
+    
+    Packet02Handshake_free(handshake);
+
+    Player *player = malloc(sizeof(Player));
+    player->username = playername;
+
+    
+
+    Packet01LoginRequest *loginreq = malloc(sizeof(Packet01LoginRequest));
+    loginreq->entity_id = 10;
+    loginreq->level_type = "default";
+    loginreq->game_mode = 0;
+    loginreq->difficulty = 2;
+    loginreq->max_players = 50;
+
+    size_t packlen;
+    char *data = Packet01LoginRequest_encode(loginreq, &packlen);
+    logmsg(LOG_DEBUG, "Sending login request.");
+    send(sock, data, packlen, 0);
+    
+}
 void *connection_thread(void *vsock){
     logmsg(LOG_INFO, "Started new connection thread.");
     int *sock = (int *) vsock;
     char buffer[BUFFERSIZE];
-    while (1){
-	int read = recv(*sock, buffer, BUFFERSIZE, 0);
-	if (read <= 0){
-	    logmsg(LOG_INFO, "Socket has been closed!");
-	    close(*sock);
-	    pthread_exit(NULL);
-	}
-	printf("Read %d bytes\n", read);
-	packet_handle02handshake(*sock, buffer, read);
+    Player *player = handle_login(*sock);
+    if (player == NULL){
+	logmsg(LOG_INFO, "Someone connected that wasn't logging in!");
 	close(*sock);
 	pthread_exit(NULL);
-	
-        
+    }
+    //close(*sock);
+    //pthread_exit(NULL);
+    
+    while (1){
+	size_t read = recv(*sock, buffer, BUFFERSIZE, 0);
+	debug_print_hex_string(buffer, read);
+	close(*sock);
+	pthread_exit(NULL);   
     }
 }
 
