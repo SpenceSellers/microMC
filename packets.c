@@ -14,8 +14,6 @@ void debug_print_hex_string(char *str, size_t len){
     printf("\n");
 }
 
-
-
 Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     logmsg(LOG_DEBUG, "Decoding Packet02Handshake");
     size_t pos = 0; //Current parsing position
@@ -54,30 +52,24 @@ char * Packet01LoginRequest_encode(Packet01LoginRequest *data, size_t *len){
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
     size_t pos = 0;
     size_t wrote;
-    packet[pos] = PACKET_LOGIN_REQUEST;
-    pos++;
+    pos += write_char(PACKET_LOGIN_REQUEST, packet + pos);
 
-    write_MCint(data->entity_id, packet+pos, &wrote);
-    pos+= wrote;
+    pos += write_int(data->entity_id, packet+pos);
     
     char *mclevelstring = encode_MCString(data->level_type, &wrote);
     memcpy(packet + pos, mclevelstring, wrote);
     pos += wrote;
 
-    packet[pos] = data->game_mode;
-    pos++;
+    pos += write_char(data->game_mode, packet+pos);
 
-    packet[pos] = data->difficulty;
-    pos++;
+    pos += write_char(data->difficulty, packet+pos);
 
     /* The minecraft protocol has an unused value here.
        It used to be world height, but now the vanilla server
        just sends zero. */
-    packet[pos] = 0;
-    pos++;
+    pos += write_char(0, packet+pos);
 
-    packet[pos] = data->max_players;
-    pos++;
+    pos += write_char(data->max_players, packet+pos);
 
     *len = pos;
 
@@ -86,7 +78,7 @@ char * Packet01LoginRequest_encode(Packet01LoginRequest *data, size_t *len){
     
 
 void Packet01LoginRequest_free(Packet01LoginRequest *data){
-    free(data->level_type);
+    free(data->level_type); TODO uncomment
     free(data);
 }
 
@@ -96,19 +88,11 @@ void Packet01LoginRequest_free(Packet01LoginRequest *data){
 char * Packet06SpawnPosition_encode(Packet06SpawnPosition *data, size_t *len){
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
     size_t pos = 0;
-    size_t wrote;
-
-    packet[pos] = PACKET_SPAWN_POSITION;
-    pos++;
-
-    write_MCint(data->x, packet + pos, &wrote);
-    pos += wrote;
-
-    write_MCint(data->y, packet + pos, &wrote);
-    pos += wrote;
-
-    write_MCint(data->z, packet + pos, &wrote);
-    pos += wrote;
+    
+    pos += write_char(PACKET_SPAWN_POSITION, packet+pos);
+    pos += write_int(data->x, packet + pos);
+    pos += write_int(data->y, packet + pos);
+    pos += write_int(data->z, packet + pos);
 
     *len = pos;
     return packet;
@@ -119,3 +103,29 @@ void Packet06SpawnPosition_free(Packet06SpawnPosition *data){
     free(data);
 }
 
+/*
+ * Packet 0x0D Player Position and Look
+ */
+
+char * Packet0DPlayerPositionAndLook_encode(Packet0DPlayerPositionAndLook *data,
+					    size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_PLAYER_POSITION_AND_LOOK, packet+pos);
+    pos += write_double(data->x, packet+pos);
+    pos += write_double(data->y_stance, packet+pos);
+    pos += write_double(data->stance_y, packet+pos);
+    pos += write_double(data->z, packet+pos);
+    pos += write_float(data->yaw, packet+pos);
+    pos += write_float(data->pitch, packet+pos);
+    pos += write_char(data->on_ground, packet+pos);
+
+    *len = pos;
+    return packet;
+    
+}
+
+void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data){
+    free(data);
+}
+    

@@ -1,6 +1,8 @@
+#include "encodings.h"
 #include "logging.h"
 
 #include <string.h>
+
 char * decode_MCString(char *mcstring, size_t *read){
     logmsg(LOG_DEBUG, "Parsing a Minecraft String.");
     // Endianness conversion...
@@ -51,9 +53,61 @@ char * encode_MCString(char *string, size_t *len){
     return mcstring;
 }
 
-void write_MCint(int i, char *place,  size_t *len){
+size_t write_int(int i, char *place){
     int bige_int = htonl(i);
-
     *(int*) place = bige_int;
-    *len = 4;
+    return 4;
+}
+
+size_t write_short(short s, char *place){
+    short flipped = htons(s);
+    *(short*) place = flipped;
+    return 2;
+}
+size_t write_char(char c, char *place){
+    *place = c;
+    return 1;
+}
+
+size_t write_float(float f, char *place){
+    float flipped = swap_float_endian(f);
+    *(float*) place = flipped;
+    return 4;
+}
+
+size_t write_double(double d, char *place){
+    double flipped = swap_double_endian(d);
+    *(double*) place = flipped;
+    return 8;
+}
+
+
+float swap_float_endian(float f){
+    float result;
+    char *fchars = (char*) &f;
+    char *rchars = (char*) &result;
+
+    rchars[0] = fchars[3];
+    rchars[1] = fchars[2];
+    rchars[2] = fchars[1];
+    rchars[3] = fchars[0];
+
+    return result;
+}
+
+double swap_double_endian(double f){
+    double result;
+    char *fchars = (char*) &f;
+    char *rchars = (char*) &result;
+
+    rchars[0] = fchars[7];
+    rchars[1] = fchars[6];
+    rchars[2] = fchars[5];
+    rchars[3] = fchars[4];
+    rchars[4] = fchars[3];
+    rchars[5] = fchars[2];
+    rchars[6] = fchars[1];
+    rchars[7] = fchars[0];
+
+    return result;
 }

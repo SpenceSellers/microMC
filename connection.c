@@ -39,19 +39,49 @@ Player * handle_login(int sock){
     Player *player = malloc(sizeof(Player));
     player->username = playername;
 
-    
+    /* Login Request */
 
     Packet01LoginRequest *loginreq = malloc(sizeof(Packet01LoginRequest));
     loginreq->entity_id = 10;
-    loginreq->level_type = "default";
+    loginreq->level_type = strdup("default");
     loginreq->game_mode = 0;
     loginreq->difficulty = 2;
     loginreq->max_players = 50;
 
     size_t packlen;
     char *data = Packet01LoginRequest_encode(loginreq, &packlen);
+    Packet01LoginRequest_free(loginreq);
     logmsg(LOG_DEBUG, "Sending login request.");
     send(sock, data, packlen, 0);
+
+    Packet06SpawnPosition *spawnpos = malloc(sizeof(Packet06SpawnPosition));
+    spawnpos->x = 0;
+    spawnpos->y = 60;
+    spawnpos->z = 0;
+
+    data = Packet06SpawnPosition_encode(spawnpos, &packlen);
+    Packet06SpawnPosition_free(spawnpos);
+    logmsg(LOG_DEBUG, "Sending Spawn Position");
+    send(sock, data, packlen, 0);
+
+    /* Position and Look */
+    
+    Packet0DPlayerPositionAndLook *pos_and_look =
+	malloc(sizeof(Packet0DPlayerPositionAndLook));
+
+    pos_and_look->x = 0.0;
+    pos_and_look->y_stance = 61.0; // Stance in this case.
+    pos_and_look->stance_y = 60.0; // Y in this case.
+    pos_and_look->z = 0.0;
+    pos_and_look->yaw = 0.0;
+    pos_and_look->pitch = 0.0;
+    pos_and_look->on_ground = 1;
+
+    data = Packet0DPlayerPositionAndLook_encode(pos_and_look, &packlen);
+    free(pos_and_look);
+    logmsg(LOG_DEBUG, "Sending player position and look.");
+    send(sock, data, packlen, 0);
+    
 
     return player;
     
@@ -66,14 +96,17 @@ void *connection_thread(void *vsock){
 	close(*sock);
 	pthread_exit(NULL);
     }
-    //close(*sock);
-    //pthread_exit(NULL);
-    
+
     while (1){
-	size_t read = recv(*sock, buffer, BUFFERSIZE, 0);
+	ssize_t read = recv(*sock, buffer, BUFFERSIZE, 0);
+        if (read <= 0){
+	    logmsg(LOG_INFO, "Socket has been closed!");
+	    close(*sock);
+	    pthread_exit(NULL);
+	    return;
+	}
 	debug_print_hex_string(buffer, read);
-	close(*sock);
-	pthread_exit(NULL);   
+	printf("=======\n");
     }
 }
 
