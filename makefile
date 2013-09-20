@@ -1,7 +1,14 @@
 LIBS = -lpthread -lm
 
 CC = gcc
-CFLAGS = -c
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+	CFLAGS = -c -g -DDEBUG
+else
+	CFLAGS = -c
+endif
+
 
 OBJS = main.o logging.o connection.o player.o server.o map.o packets.o encodings.o
 
@@ -15,3 +22,4 @@ all: $(OBJS)
 
 clean:
 	rm *.o $(BINARY)
+
