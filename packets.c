@@ -58,10 +58,13 @@ char * Packet01LoginRequest_encode(Packet01LoginRequest *data, size_t *len){
     
     char *mclevelstring = encode_MCString(data->level_type, &wrote);
     memcpy(packet + pos, mclevelstring, wrote);
+    free(mclevelstring);
+    
     pos += wrote;
 
     pos += write_char(data->game_mode, packet+pos);
 
+    pos += write_char(data->dimension, packet+pos);
     pos += write_char(data->difficulty, packet+pos);
 
     /* The minecraft protocol has an unused value here.
@@ -78,7 +81,7 @@ char * Packet01LoginRequest_encode(Packet01LoginRequest *data, size_t *len){
     
 
 void Packet01LoginRequest_free(Packet01LoginRequest *data){
-    free(data->level_type); TODO uncomment
+    free(data->level_type);
     free(data);
 }
 

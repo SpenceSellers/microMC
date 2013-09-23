@@ -15,6 +15,7 @@ typedef struct Packet01LoginRequest {
     int entity_id;
     char *level_type;
     char game_mode;
+    char dimension;
     char difficulty;
     char max_players;
 } Packet01LoginRequest;

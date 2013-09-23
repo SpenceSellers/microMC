@@ -9,6 +9,8 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <netdb.h>
+#include <limits.h>
+
 #define BUFFERSIZE 1024
 
 #define PORT "25565"
@@ -16,6 +18,7 @@
 
 Player * handle_login(int sock){
     logmsg(LOG_DEBUG, "Handling a login...");
+    size_t sent;
     char buffer[BUFFERSIZE];
     int read = recv(sock, buffer, BUFFERSIZE, 0);
     if (read <= 0){
@@ -39,38 +42,52 @@ Player * handle_login(int sock){
     Player *player = malloc(sizeof(Player));
     player->username = playername;
 
-    /* Login Request */
+    /*
+     * Login Request
+     */
 
     Packet01LoginRequest *loginreq = malloc(sizeof(Packet01LoginRequest));
     loginreq->entity_id = 10;
     loginreq->level_type = strdup("default");
     loginreq->game_mode = 0;
     loginreq->difficulty = 2;
+    loginreq->dimension = 0;
     loginreq->max_players = 50;
 
     size_t packlen;
     char *data = Packet01LoginRequest_encode(loginreq, &packlen);
+        
     Packet01LoginRequest_free(loginreq);
     logmsg(LOG_DEBUG, "Sending login request.");
-    send(sock, data, packlen, 0);
+    sent = send(sock, data, packlen, 0);
+    free(data);
 
-    Packet06SpawnPosition *spawnpos = malloc(sizeof(Packet06SpawnPosition));
-    spawnpos->x = 0;
-    spawnpos->y = 60;
-    spawnpos->z = 0;
+    if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");
 
-    data = Packet06SpawnPosition_encode(spawnpos, &packlen);
+    Packet06SpawnPosition *spawnpos = malloc(sizeof(spawnpos));
+    spawnpos->x = INT_MAX;
+    spawnpos->y = INT_MAX;
+    spawnpos->z = INT_MAX;
+
+    char *data2;
+    data2 = Packet06SpawnPosition_encode(spawnpos, &packlen);
     Packet06SpawnPosition_free(spawnpos);
     logmsg(LOG_DEBUG, "Sending Spawn Position");
-    send(sock, data, packlen, 0);
+    printf("06: %x \n", data2[0]);
+    sent = send(sock, data2, packlen, 0);
+    debug_print_hex_string(data2, packlen);
+    free(data2);
+    if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");
 
-    /* Position and Look */
+    /*
+     *Position and Look
+     */
     
     Packet0DPlayerPositionAndLook *pos_and_look =
 	malloc(sizeof(Packet0DPlayerPositionAndLook));
 
     pos_and_look->x = 0.0;
-    pos_and_look->y_stance = 61.0; // Stance in this case.
+    pos_and_look->y_stance = 61.0; // Stance in this case. //THIS is sent as start of packet.
     pos_and_look->stance_y = 60.0; // Y in this case.
     pos_and_look->z = 0.0;
     pos_and_look->yaw = 0.0;
@@ -79,10 +96,12 @@ Player * handle_login(int sock){
 
     data = Packet0DPlayerPositionAndLook_encode(pos_and_look, &packlen);
     free(pos_and_look);
-    logmsg(LOG_DEBUG, "Sending player position and look.");
-    send(sock, data, packlen, 0);
     
-
+    sent = send(sock, data, packlen, 0);
+    free(data);
+    if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");	
+    
+    
     return player;
     
 }
@@ -105,8 +124,7 @@ void *connection_thread(void *vsock){
 	    pthread_exit(NULL);
 	    return;
 	}
-	debug_print_hex_string(buffer, read);
-	printf("=======\n");
+	
     }
 }
 
