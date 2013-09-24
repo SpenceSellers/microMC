@@ -1,6 +1,5 @@
 #include "server.h"
 #include "logging.h"
-
 #include <stdlib.h>
     
 Server * Server_create(Map *map, size_t max_players){
@@ -60,4 +59,14 @@ void Server_remove_player(Server *server, Player *player){
 	server->players[i] = server->players[i+1];
     }
     server->num_players -= 1;
+}
+
+void Server_shutdown(Server *server){
+    server->isrunning = 0;
+    close(server->distributor_socket);
+
+    int i;
+    for(i=0; i < server->num_players; i++){
+	Player_disconnect(server->players[i]);
+    }
 }

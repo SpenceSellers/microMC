@@ -7,7 +7,9 @@ typedef struct Player {
     char *username;
     int entity_id;
     int socket;
-    pthread_t connection_thread;
     
 } Player;
+
+void Player_disconnect(Player *player);
+void Player_free(Player *player);
 #endif

@@ -23,6 +23,7 @@ typedef struct Server {
      * There is no lock because only the main thread
      * should ever need to touch it. */
     pthread_t distributor_thread;
+    int distributor_socket;
 
 } Server;
 
@@ -48,5 +49,7 @@ void Server_add_player(Server *server, Player *player);
  *  players_lock should be write-locked before use.
  */
 void Server_remove_player(Server *server, Player *player);
+
+void Server_shutdown(Server *server);
 #endif
 

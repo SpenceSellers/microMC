@@ -3,6 +3,7 @@
 #include "pthread.h"
 #include "player.h"
 #include "packets.h"
+#include "server.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,6 +27,10 @@ Player * handle_login(int sock){
 	close(sock);
 	pthread_exit(NULL);
     }
+    if (buffer[0] != PACKET_HANDSHAKE){
+	logmsg(LOG_DEBUG, "Someone connected, but is not a minecraft login!");
+	return NULL;
+    }
     
     Packet02Handshake *handshake = Packet02Handshake_parse(buffer, read);
 
@@ -41,6 +46,8 @@ Player * handle_login(int sock){
 
     Player *player = malloc(sizeof(Player));
     player->username = playername;
+    player->socket = sock;
+    
 
     /*
      * Login Request
@@ -73,7 +80,6 @@ Player * handle_login(int sock){
     data2 = Packet06SpawnPosition_encode(spawnpos, &packlen);
     Packet06SpawnPosition_free(spawnpos);
     logmsg(LOG_DEBUG, "Sending Spawn Position");
-    printf("06: %x \n", data2[0]);
     sent = send(sock, data2, packlen, 0);
     debug_print_hex_string(data2, packlen);
     free(data2);
@@ -101,26 +107,39 @@ Player * handle_login(int sock){
     free(data);
     if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");	
     
-    
+    logmsg(LOG_DEBUG, "Done handling login!");
     return player;
     
 }
-void *connection_thread(void *vsock){
+struct ConnectionThreadArgs {
+    int sock;
+    Server *server;
+};
+    
+void *connection_thread(void *args){
     logmsg(LOG_INFO, "Started new connection thread.");
-    int *sock = (int *) vsock;
+    struct ConnectionThreadArgs *ctargs;
+    ctargs = (struct ConnectionThreadArgs *) args;
+    
+    int sock = ctargs->sock;
+    Server *server = ctargs->server;
+    
     char buffer[BUFFERSIZE];
-    Player *player = handle_login(*sock);
+    Player *player = handle_login(sock);
     if (player == NULL){
-	logmsg(LOG_INFO, "Someone connected that wasn't logging in!");
-	close(*sock);
+	close(sock);
 	pthread_exit(NULL);
+    } else {
+	pthread_rwlock_wrlock(&server->players_lock);
+	Server_add_player(server, player);
+	pthread_rwlock_unlock(&server->players_lock);
     }
 
     while (1){
-	ssize_t read = recv(*sock, buffer, BUFFERSIZE, 0);
+	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);
         if (read <= 0){
 	    logmsg(LOG_INFO, "Socket has been closed!");
-	    close(*sock);
+	    close(sock);
 	    pthread_exit(NULL);
 	    return;
 	}
@@ -128,7 +147,8 @@ void *connection_thread(void *vsock){
     }
 }
 
-void *connection_distributor_thread(void *nothing){
+void *connection_distributor_thread(void *args){
+    Server *server = (Server*) args;
     
     logmsg(LOG_INFO, "Started new distributor thread.");
 
@@ -154,25 +174,24 @@ void *connection_distributor_thread(void *nothing){
 
     addr_size = sizeof their_addr;
     
-    
+    server->distributor_socket = sock;
     while (1){
-	logmsg(LOG_DEBUG, "Main Thread waiting on new connection.");
+	logmsg(LOG_DEBUG, "Distributor waiting on new connection.");
 	new_fd = accept(sock, (struct sockaddr *)&their_addr, &addr_size);
 	if (new_fd == -1){
 	    logmsg(LOG_ERROR, "Error accepting connection!");
 	}
 	logmsg(LOG_INFO, "Accepted connection. Starting new thread!");
+	struct ConnectionThreadArgs ctargs;
+	ctargs.server = server;
+	ctargs.sock = new_fd;
+	
 	pthread_t thread;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	pthread_create(&thread, &attr, &connection_thread, &new_fd);
+	pthread_create(&thread, &attr, &connection_thread, &ctargs);
 	pthread_attr_destroy(&attr);
-	
-	logmsg(LOG_INFO, "Waiting for thread to join.");
-	pthread_join(thread, NULL);
-	
-	break; // TODO remove
     }
 
     logmsg(LOG_INFO, "Closing distributor socket/thread.");
