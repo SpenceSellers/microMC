@@ -19,7 +19,7 @@ int main(){
     
     pthread_t distributor;
 
-    Server *server = Server_create(NULL);
+    Server *server = Server_create(NULL, 10);
     
     pthread_create(&distributor, NULL, &connection_distributor_thread, NULL);
     logmsg(LOG_INFO, "Distributor thread started.");
