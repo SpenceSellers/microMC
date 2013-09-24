@@ -12,4 +12,6 @@ typedef struct Player {
 
 void Player_disconnect(Player *player);
 void Player_free(Player *player);
+
+void Player_send_keep_alive(Player *player);
 #endif

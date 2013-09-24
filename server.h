@@ -7,8 +7,9 @@
 #include <stdlib.h>
 
 typedef struct Server {
-    pthread_rwlock_t running_lock;
-    char isrunning;
+    pthread_rwlock_t state_lock;
+    char is_running;
+    long time;
 
     size_t max_players;
     
@@ -50,6 +51,6 @@ void Server_add_player(Server *server, Player *player);
  */
 void Server_remove_player(Server *server, Player *player);
 
+void Server_tick(Server *server);
 void Server_shutdown(Server *server);
 #endif
-

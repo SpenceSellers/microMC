@@ -13,7 +13,18 @@ void debug_print_hex_string(char *str, size_t len){
     }
     printf("\n");
 }
-
+char * Packet00KeepAlive_encode(Packet00KeepAlive *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    
+    size_t pos = 0;
+    pos += write_char(PACKET_KEEP_ALIVE, packet+pos);
+    pos += write_int(data->id, packet+pos);
+    *len = pos;
+    return packet;
+}
+void Packet00KeepAlive_free(Packet00KeepAlive *data){
+    free(data);
+}
 Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     logmsg(LOG_DEBUG, "Decoding Packet02Handshake");
     size_t pos = 0; //Current parsing position
@@ -25,7 +36,6 @@ Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     pos++;
     Packet02Handshake *packet = malloc(sizeof(Packet02Handshake));
     size_t read = 0; //Number of bytes last parsed
-
     packet->version = data[pos];
     pos++;
     

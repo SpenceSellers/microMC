@@ -72,9 +72,9 @@ Player * handle_login(int sock){
     if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");
 
     Packet06SpawnPosition *spawnpos = malloc(sizeof(spawnpos));
-    spawnpos->x = INT_MAX;
-    spawnpos->y = INT_MAX;
-    spawnpos->z = INT_MAX;
+    spawnpos->x = 0;
+    spawnpos->y = 64;
+    spawnpos->z = 0;
 
     char *data2;
     data2 = Packet06SpawnPosition_encode(spawnpos, &packlen);
@@ -93,8 +93,8 @@ Player * handle_login(int sock){
 	malloc(sizeof(Packet0DPlayerPositionAndLook));
 
     pos_and_look->x = 0.0;
-    pos_and_look->y_stance = 61.0; // Stance in this case. //THIS is sent as start of packet.
-    pos_and_look->stance_y = 60.0; // Y in this case.
+    pos_and_look->y_stance = 65.0; // Stance in this case.
+    pos_and_look->stance_y = 64.0; // Y in this case.
     pos_and_look->z = 0.0;
     pos_and_look->yaw = 0.0;
     pos_and_look->pitch = 0.0;

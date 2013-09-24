@@ -4,13 +4,20 @@
 #include <stdlib.h>
 #include "player.h"
 
+#define PACKET_KEEP_ALIVE 0x00
 #define PACKET_LOGIN_REQUEST 0x01
 #define PACKET_HANDSHAKE 0x02
 #define PACKET_SPAWN_POSITION 0x06
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 
 void debug_print_hex_string(char *str, size_t len);
+typedef struct Packet00KeepAlive {
+    int id;
+} Packet00KeepAlive;
 
+char * Packet00KeepAlive_encode(Packet00KeepAlive *data, size_t *len);
+void Packet00KeepAlive_free(Packet00KeepAlive *data);
+    
 typedef struct Packet01LoginRequest {
     int entity_id;
     char *level_type;

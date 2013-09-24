@@ -5,8 +5,9 @@
 Server * Server_create(Map *map, size_t max_players){
     Server *server = malloc(sizeof(Server));
 
-    server->isrunning = 1;
-    pthread_rwlock_init(&(server->running_lock), NULL);
+    server->is_running = 1;
+    pthread_rwlock_init(&(server->state_lock), NULL);
+    server->time = 0;
 
     pthread_rwlock_init( &(server->players_lock), NULL);
     
@@ -61,8 +62,18 @@ void Server_remove_player(Server *server, Player *player){
     server->num_players -= 1;
 }
 
+void Server_tick(Server *server){
+    server->time++;
+
+    if (server->time % 20 == 0) { // Send keep alives.
+	int i;
+	for(i=0; i < server->num_players; i++){
+	    Player_send_keep_alive(server->players[i]);
+	}
+    }
+}
 void Server_shutdown(Server *server){
-    server->isrunning = 0;
+    server->is_running = 0;
     close(server->distributor_socket);
 
     int i;
