@@ -138,8 +138,13 @@ void *connection_thread(void *args){
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);
         if (read <= 0){
-	    logmsg(LOG_INFO, "Socket has been closed!");
+	    logmsg(LOG_INFO, "Socket has been closed! Removing player.");
 	    close(sock);
+	    pthread_rwlock_wrlock(&server->players_lock);
+	    
+	    Server_remove_player(server, player);
+	    Player_free(player);
+	    pthread_rwlock_unlock(&server->players_lock);
 	    pthread_exit(NULL);
 	    return;
 	}
