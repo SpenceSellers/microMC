@@ -137,6 +137,11 @@ void *connection_thread(void *args){
     }
 
     Chunk *c = Chunk_new_empty();
+    Block block;
+    block.id = 2;
+    block.metadata = 0;
+    Chunk_set_block(c, 10, 64, 10, block);
+    //Chunk_set_block(c, 0, 0, 0, block);
     size_t len;
     char *dat = Packet33ChunkData_construct(c, 0, 0, &len);
     send(sock, dat, len, 0);

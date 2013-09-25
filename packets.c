@@ -200,7 +200,6 @@ char *construct_chunk_data(Chunk *chunk, size_t *len){
 
 char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
     logmsg(LOG_INFO, "Constructing packet.");
-    char *data = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
     size_t chunkdata_len;
     char *chunkdata = construct_chunk_data(chunk, &chunkdata_len);
 
@@ -217,8 +216,11 @@ char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
 	chunkdata, chunkdata_len, compressed_data, CHUNK_PACKET_BUFFER_SIZE);
     packet.compressed_data = compressed_data;
     packet.compressed_size = comp_len;
-
+    free(chunkdata);
+    
     char *final = Packet33ChunkData_encode(&packet, len);
+
+    free(compressed_data);
     logmsg(LOG_INFO, "Done constructing.");
     return final;
     

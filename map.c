@@ -15,14 +15,11 @@ Chunk * Chunk_new_empty(){
     for (i=0; i < 16*16*256; i++){
 	chunk->blocks[i] = airblock;
     }
-    logmsg(LOG_DEBUG, "On to biome data");
     for(i=0; i < 16*16; i++){
-	printf("Looping: %d\n", i);
 	chunk->biome_data[i] = DEFAULT_BIOME;
     }
     
     logmsg(LOG_DEBUG, "Finishing making chunk.");
-    logmsg(LOG_DEBUG, "Thing");
     return chunk;
 }
 
