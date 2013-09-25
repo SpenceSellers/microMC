@@ -2,6 +2,7 @@
 #include "logging.h"
 
 #include <string.h>
+#include <zlib.h>
 
 char * decode_MCString(char *mcstring, size_t *read){
     logmsg(LOG_DEBUG, "Parsing a Minecraft String.");
@@ -81,6 +82,15 @@ size_t write_double(double d, char *place){
     return 8;
 }
 
+size_t write_compressed(char *data, size_t len, char *place, size_t maxlen){
+    size_t written = maxlen;
+    int e = compress(place, &written, data, len);
+    if (e == Z_MEM_ERROR){
+	logmsg(LOG_ERROR, "Not enough memory given to compress data!");
+    }
+    return written;
+}
+    
 
 float swap_float_endian(float f){
     float result;
@@ -94,6 +104,7 @@ float swap_float_endian(float f){
 
     return result;
 }
+
 
 double swap_double_endian(double f){
     double result;
@@ -110,4 +121,8 @@ double swap_double_endian(double f){
     rchars[7] = fchars[0];
 
     return result;
+}
+
+char pack_halfchars(char a, char b){
+    return (a << 4) & b;
 }

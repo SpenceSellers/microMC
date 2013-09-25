@@ -3,12 +3,14 @@
 
 #include <stdlib.h>
 #include "player.h"
+#include "map.h"
 
 #define PACKET_KEEP_ALIVE 0x00
 #define PACKET_LOGIN_REQUEST 0x01
 #define PACKET_HANDSHAKE 0x02
 #define PACKET_SPAWN_POSITION 0x06
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
+#define PACKET_CHUNK_DATA 0x33
 
 void debug_print_hex_string(char *str, size_t len);
 typedef struct Packet00KeepAlive {
@@ -61,4 +63,18 @@ typedef struct Packet0DPlayerPositionAndLook {
 char * Packet0DPlayerPositionAndLook_encode(Packet0DPlayerPositionAndLook *data,
 					    size_t *len);
 void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data);
+
+typedef struct Packet33ChunkData {
+    int x;
+    int z;
+    char continuous;
+    unsigned short bitmap;
+    int compressed_size;
+    char *compressed_data;
+} Packet33ChunkData;
+
+char * Packet33ChunkData_encode(Packet33ChunkData *data, size_t *len);
+void Packet33ChunkData_free(Packet33ChunkData *data);
+char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len);
+
 #endif

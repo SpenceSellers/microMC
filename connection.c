@@ -4,6 +4,7 @@
 #include "player.h"
 #include "packets.h"
 #include "server.h"
+#include "map.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -135,6 +136,11 @@ void *connection_thread(void *args){
 	pthread_rwlock_unlock(&server->players_lock);
     }
 
+    Chunk *c = Chunk_new_empty();
+    size_t len;
+    char *dat = Packet33ChunkData_construct(c, 0, 0, &len);
+    send(sock, dat, len, 0);
+    
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);
         if (read <= 0){

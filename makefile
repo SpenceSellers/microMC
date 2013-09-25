@@ -1,4 +1,4 @@
-LIBS = -lpthread -lm
+LIBS = -lpthread -lm -lz
 
 CC = gcc
 

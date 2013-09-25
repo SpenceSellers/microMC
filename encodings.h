@@ -15,7 +15,12 @@ size_t write_short(short s, char *place);
 size_t write_char(char c, char *place);
 size_t write_float(float f, char *place);
 size_t write_double(double d, char *place);
+size_t write_compressed(char *data, size_t len, char *place, size_t maxlen);
 
+			
 float swap_float_endian(float f);
 double swap_double_endian(double f);
+
+char pack_halfchars(char a, char b);
+
 #endif

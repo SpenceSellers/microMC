@@ -6,6 +6,7 @@
 #include "encodings.h"
 
 #define PACKET_BUFFER_SIZE 2048
+#define CHUNK_PACKET_BUFFER_SIZE 200000
 void debug_print_hex_string(char *str, size_t len){
     int i;
     for (i=0; i < len; i++){
@@ -142,3 +143,83 @@ void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data){
     free(data);
 }
     
+/* 
+ * Packet 33 Chunk Data
+ */
+char * Packet33ChunkData_encode(Packet33ChunkData *data, size_t *len){
+    if (data->compressed_size + 18 > CHUNK_PACKET_BUFFER_SIZE){
+	logmsg(LOG_ERROR, "Chunk data is too big to fit in packet buffer!");
+	return NULL;
+    }
+    
+    char *packet = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_CHUNK_DATA, packet+pos);
+    pos += write_int(data->x, packet+pos);
+    pos += write_int(data->z, packet+pos);
+    pos += write_char(data->continuous, packet+pos);
+    pos += write_short(data->bitmap, packet+pos);
+    pos += write_int(data->compressed_size, packet+pos);
+    memcpy(packet + pos, data->compressed_data, data->compressed_size);
+    pos += data->compressed_size;
+
+    *len = pos;
+    return packet;
+    
+}
+
+void Packet33ChunkData_free(Packet33ChunkData *data){
+    free(data->compressed_data);
+    free(data);
+}
+
+char *construct_chunk_data(Chunk *chunk, size_t *len){
+    char * data = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    int i;
+    for (i=0; i < 16*16*256; i++){
+	pos += write_char(chunk->blocks[i].id, data+pos);
+    }
+    for (i=0; i < (16*16*256)/2; i+= 2){
+	pos += write_char(
+	    pack_halfchars(chunk->blocks[i].metadata,
+			   chunk->blocks[i+1].metadata),
+	    data + pos);
+    }
+    for (i=0; i < (16*16*256)/2; i+= 2){
+	pos += write_char(17, data + pos);
+    }
+    // We can skip the Add array.
+    for (i=0; i < (16*16); i++){
+	pos += write_char(chunk->biome_data[i], data+pos);
+    }
+
+    *len = pos;
+    return data;
+}
+
+char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
+    logmsg(LOG_INFO, "Constructing packet.");
+    char *data = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
+    size_t chunkdata_len;
+    char *chunkdata = construct_chunk_data(chunk, &chunkdata_len);
+
+    Packet33ChunkData packet;
+    packet.x = x;
+    packet.z = z;
+    packet.continuous = 1;
+    packet.bitmap = 15; // All subchunks
+
+    size_t comp_len = 0;
+
+    char *compressed_data = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
+    comp_len = write_compressed(
+	chunkdata, chunkdata_len, compressed_data, CHUNK_PACKET_BUFFER_SIZE);
+    packet.compressed_data = compressed_data;
+    packet.compressed_size = comp_len;
+
+    char *final = Packet33ChunkData_encode(&packet, len);
+    logmsg(LOG_INFO, "Done constructing.");
+    return final;
+    
+}
