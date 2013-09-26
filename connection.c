@@ -112,6 +112,23 @@ Player * handle_login(int sock){
     return player;
     
 }
+
+void send_all_chunks(Player *p, Map *map){
+    logmsg(LOG_INFO, "Sending all chunks to a player!");
+    int i;
+    int j;
+    for (i=0; i < map->xchunks; i++){
+        for (j=0; j < map->zchunks; j++){
+	    Chunk *c = Map_get_chunk(map, i, j);
+	    if (c == NULL) continue;
+	    size_t len;
+	    char *data = Packet33ChunkData_construct(c, i, j, &len);
+	    send(p->socket, data, len, 0);
+	    free(data);
+	}
+    }
+}
+	    
 struct ConnectionThreadArgs {
     int sock;
     Server *server;
@@ -135,19 +152,8 @@ void *connection_thread(void *args){
 	Server_add_player(server, player);
 	pthread_rwlock_unlock(&server->players_lock);
     }
-
-    Chunk *c = Chunk_new_empty();
-    Block block;
-    block.id = 2;
-    block.metadata = 0;
-    Chunk_set_block(c, 0, 64, 0, block);
-    Chunk_set_block(c, 0, 0, 0, block);
-    Chunk_set_block(c, 1, 0, 0, block);
-    
-    size_t len;
-    char *dat = Packet33ChunkData_construct(c, 0, 0, &len);
-    int sent = send(sock, dat, len, 0);
-    
+    /* Now to send the chunks to the player. */
+    send_all_chunks(player, server->map);
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);
         if (read <= 0){

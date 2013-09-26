@@ -12,6 +12,7 @@
 #include "logging.h"
 #include "connection.h"
 #include "server.h"
+#include "map.h"
 
 // Global variable for signal handling only!
 static Server *sigint_server;
@@ -25,8 +26,13 @@ static void catch_sigint(int signal){
 int main(){
     logging_init();
     logmsg(LOG_INFO, "Server started and logging started.");
-
-    Server *server = Server_create(NULL, 10);
+    Map *map = Map_new_air(5,5);
+    Block b;
+    b.id = 1;
+    b.metadata = 0;
+    
+    Map_set_below(map, b, 20);
+    Server *server = Server_create(map, 10);
     sigint_server = server;
     server->is_running = 1;
     signal(SIGINT, catch_sigint);

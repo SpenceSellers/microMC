@@ -1,6 +1,5 @@
 #include "player.h"
 #include "packets.h"
-
 #include <stdlib.h>
 #include "logging.h"
 void Player_disconnect(Player *player){
