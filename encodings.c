@@ -91,6 +91,29 @@ size_t write_compressed(char *data, size_t len, char *place, size_t maxlen){
     return written;
 }
     
+int read_int(char *place, size_t *read){
+    if (read) *read += 4;
+    return ntohl(*( (int*) place));
+}
+short read_short(char *place, size_t *read){
+    if (read) *read += 2;
+    return ntohs(*( (short*) place));
+}
+char read_char(char *place, size_t *read){
+    if (read) *read += 1;
+    return *place;
+}
+float read_float(char *place, size_t *read){
+    float f = *(float*) place;
+    if (read) *read += 4;
+    return swap_float_endian(f);
+}
+
+double read_double(char *place, size_t *read){
+    double d = *(double*) place;
+    if (read) *read += 8;
+    return swap_double_endian(d);
+}
 
 float swap_float_endian(float f){
     float result;
