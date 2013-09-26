@@ -57,7 +57,7 @@ Player * handle_login(int sock){
     Packet01LoginRequest *loginreq = malloc(sizeof(Packet01LoginRequest));
     loginreq->entity_id = 10;
     loginreq->level_type = strdup("default");
-    loginreq->game_mode = 0;
+    loginreq->game_mode = 1; //0 is survival, 1 is creative.
     loginreq->difficulty = 2;
     loginreq->dimension = 0;
     loginreq->max_players = 50;
@@ -140,11 +140,13 @@ void *connection_thread(void *args){
     Block block;
     block.id = 2;
     block.metadata = 0;
-    Chunk_set_block(c, 10, 64, 10, block);
-    //Chunk_set_block(c, 0, 0, 0, block);
+    Chunk_set_block(c, 0, 64, 0, block);
+    Chunk_set_block(c, 0, 0, 0, block);
+    Chunk_set_block(c, 1, 0, 0, block);
+    
     size_t len;
     char *dat = Packet33ChunkData_construct(c, 0, 0, &len);
-    send(sock, dat, len, 0);
+    int sent = send(sock, dat, len, 0);
     
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);

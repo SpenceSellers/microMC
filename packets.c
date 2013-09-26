@@ -159,6 +159,7 @@ char * Packet33ChunkData_encode(Packet33ChunkData *data, size_t *len){
     pos += write_int(data->z, packet+pos);
     pos += write_char(data->continuous, packet+pos);
     pos += write_short(data->bitmap, packet+pos);
+    pos += write_short(0, packet+pos); // Add bit map, unused here.
     pos += write_int(data->compressed_size, packet+pos);
     memcpy(packet + pos, data->compressed_data, data->compressed_size);
     pos += data->compressed_size;
@@ -177,16 +178,19 @@ char *construct_chunk_data(Chunk *chunk, size_t *len){
     char * data = malloc(sizeof(char) * CHUNK_PACKET_BUFFER_SIZE);
     size_t pos = 0;
     int i;
+    //Block Id's
     for (i=0; i < 16*16*256; i++){
 	pos += write_char(chunk->blocks[i].id, data+pos);
     }
-    for (i=0; i < (16*16*256)/2; i+= 2){
+    //Metadata
+    for (i=0; i < (16*16*256); i+= 2){
 	pos += write_char(
 	    pack_halfchars(chunk->blocks[i].metadata,
 			   chunk->blocks[i+1].metadata),
 	    data + pos);
     }
-    for (i=0; i < (16*16*256)/2; i+= 2){
+    
+    for (i=0; i < (16*16*256); i+= 2){
 	pos += write_char(17, data + pos);
     }
     // We can skip the Add array.
@@ -207,7 +211,7 @@ char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
     packet.x = x;
     packet.z = z;
     packet.continuous = 1;
-    packet.bitmap = 15; // All subchunks
+    packet.bitmap = 65534; // All subchunks
 
     size_t comp_len = 0;
 

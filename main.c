@@ -40,7 +40,7 @@ int main(){
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 50000000; // 50 ms.
     while (server->is_running){
-	logmsg(LOG_DEBUG, "Tick!");
+	//logmsg(LOG_DEBUG, "Tick!");
 	Server_tick(server);
 	nanosleep(&sleeptime, NULL);
     }
