@@ -37,6 +37,10 @@ char * decode_MCString(char *mcstring, size_t *read){
 
 char * encode_MCString(char *string, size_t *len){
     logmsg(LOG_DEBUG, "Encoding a MCstring");
+    if (string == NULL){
+	logmsg(LOG_ERROR, "A null string has been encoded!");
+    }
+    
     size_t stringlen = strlen(string);
     size_t mcstrlen = (stringlen * 2) + 2; //Plus Two for size short.
     char *mcstring = malloc(sizeof(char) * mcstrlen);
@@ -149,3 +153,18 @@ double swap_double_endian(double f){
 char pack_halfchars(char a, char b){
     return (a << 4) & b;
 }
+
+char * fake_json_chat(char *str){
+    char *before = "{\"text\":\"";
+    char *after = "\"}";
+
+    char *fake_json = malloc(sizeof(char) * (strlen(before) + strlen(after) + strlen(str) + 1));
+
+    fake_json[0] = 0;
+    strcat(fake_json, before);
+    strcat(fake_json, str);
+    strcat(fake_json, after);
+    printf("Fake json: %s \n", fake_json);
+    return fake_json;
+}
+    

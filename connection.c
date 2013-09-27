@@ -33,7 +33,9 @@ void *connection_thread(void *args){
     Server *server = ctargs->server;
     
     char buffer[BUFFERSIZE];
-    Player *player = handle_login(sock);
+    pthread_rwlock_rdlock(&server->state_lock);
+    Player *player = handle_login(sock, server);
+    pthread_rwlock_unlock(&server->state_lock);
     if (player == NULL){
 	close(sock);
 	pthread_exit(NULL);
@@ -59,7 +61,7 @@ void *connection_thread(void *args){
 	    Player_free(player);
 	    pthread_rwlock_unlock(&server->players_lock);
 	    pthread_exit(NULL);
-	    return;
+	    return NULL;
 	}
         //printf("Packet of type: %d \n", buffer[0]);
 	if (buffer[0] == PACKET_PLAYER_DIGGING){
@@ -74,6 +76,7 @@ void *connection_thread(void *args){
 	}
 	
     }
+    return NULL;
 }
 
 void *connection_distributor_thread(void *args){

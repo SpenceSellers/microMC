@@ -78,7 +78,7 @@ void Server_shutdown(Server *server){
 
     int i;
     for(i=0; i < server->num_players; i++){
-	Player_disconnect(server->players[i]);
+	Player_disconnect(server->players[i], "Server shutting down!");
     }
 }
 

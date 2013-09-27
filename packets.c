@@ -108,6 +108,8 @@ char * Packet03ChatMessage_encode(Packet03ChatMessage *data, size_t *len){
     memcpy(packet+pos, mc_chatstring, stringwrote);
     free(mc_chatstring);
 
+    pos += stringwrote;
+
     *len = pos;
     return packet;
 }
@@ -299,7 +301,7 @@ char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
 
 char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len){
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
-    int pos = 0;
+    size_t pos = 0;
     pos += write_char(PACKET_BLOCK_CHANGE, packet+pos);
     pos += write_int(data->x, packet+pos);
     pos += write_char(data->y, packet+pos);
@@ -312,5 +314,39 @@ char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len){
 }
 
 void Packet35BlockChange_free(Packet35BlockChange *data){
+    free(data);
+}
+
+/*
+ * Packet 0xFF Disconnect
+ */
+
+char *PacketFFDisconnect_encode(PacketFFDisconnect *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_DISCONNECT, packet+pos);
+    size_t reason_len;
+    char *mc_reason = encode_MCString(data->reason, &reason_len);
+    memcpy(packet+pos, mc_reason, reason_len);
+    free(mc_reason);
+
+    *len = pos;
+    return packet;
+}
+
+PacketFFDisconnect *PacketFFDisconnect_parse(char *data, size_t len){
+    PacketFFDisconnect *packet =  malloc(sizeof(packet));
+    size_t pos = 0;
+    if (read_char(data + pos, &pos) != PACKET_DISCONNECT){
+	logmsg(LOG_WARN, "This is not a disconnect packet!");
+	return NULL;
+    }
+    size_t read;
+    packet->reason = decode_MCString(data+pos, &read);
+    return packet;
+}
+
+void PacketFFDisconnect_free(PacketFFDisconnect *data){
+    free(data->reason);
     free(data);
 }

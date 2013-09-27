@@ -36,7 +36,6 @@ Player * handle_login(int sock, Server *s){
     player->username = playername;
     player->socket = sock;
     
-
     /*
      * Login Request
      */
@@ -132,4 +131,8 @@ void send_all_chunks(Player *p, Map *map){
 
 void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
     printf("Player said: %s \n", packet->str);
+    Player_send_message(p, packet->str);
+    if (strcmp(packet->str, "/kickme") == 0){
+	Player_disconnect(p, "Get outa here!");
+    }
 }

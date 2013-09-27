@@ -1,10 +1,23 @@
 #include "player.h"
 #include "packets.h"
 #include <stdlib.h>
+#include <string.h>
 #include "logging.h"
+#include "encodings.h"
 #include "map.h"
 
-void Player_disconnect(Player *player){
+void Player_disconnect(Player *player, char * reason){
+    PacketFFDisconnect *disconnect = malloc(sizeof(disconnect));
+    if (reason != NULL){
+	disconnect->reason = strdup(reason);
+    } else {
+	disconnect->reason = strdup("Bye!");
+    }
+    size_t len;
+    char *packet = PacketFFDisconnect_encode(disconnect, &len);
+    send(player->socket, packet, &len, 0);
+    PacketFFDisconnect_free(disconnect);
+    free(packet);
     close(player->socket);
 }
 
@@ -49,3 +62,15 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z){
     Server_change_block(s, air, x, y, z);
 }
 
+void Player_send_message(Player *player, char *msg){
+    Packet03ChatMessage *chatmsg = malloc(sizeof(Packet03ChatMessage));
+    chatmsg->str = fake_json_chat(msg);
+    size_t len;
+    
+    char * packet = Packet03ChatMessage_encode(chatmsg, &len);
+
+    send(player->socket, packet, len, 0);
+
+    free(packet);
+    Packet03ChatMessage_free(chatmsg);
+}

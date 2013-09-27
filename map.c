@@ -71,7 +71,6 @@ Map * Map_new_air(ssize_t x, ssize_t z){
     int j;
     for (i=0; i < x; i++){
 	for (j=0; j < z; j++){
-	    printf("Chunk %d, %d \n", i, j);
 	    Chunk *c = Chunk_new_empty();
 	    Map_set_chunk(map, c, i, j);
 	}
@@ -98,17 +97,14 @@ void Map_set_chunk(Map *map, Chunk *chunk, ssize_t x, ssize_t z){
 void Map_set_block(Map *map, Block block, int x, int y, int z){
     ssize_t chunkx = x / 16;
     ssize_t chunkz = z / 16;
-    printf("cx: %d, cz: %d, x: %d, z:%d \n", chunkx, chunkz, x, z);
 
     Chunk *chunk = Map_get_chunk(map, chunkx, chunkz);
 
     
     Block testb;
     testb = Chunk_get_block(chunk, x%16, y, z%16);
-    printf("Block was: %d \n", testb.id);
     Chunk_set_block(chunk, x%16, y, z%16, block);
     testb = Chunk_get_block(chunk, x%16, y, z%16);
-    printf("Block is now: %d \n", testb.id);
 }
 
 void Map_set_below(Map *map, Block b, int level){

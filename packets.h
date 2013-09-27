@@ -14,6 +14,7 @@
 #define PACKET_PLAYER_DIGGING 0x0E
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
+#define PACKET_DISCONNECT 0xFF
 void debug_print_hex_string(char *str, size_t len);
 typedef struct Packet00KeepAlive {
     int id;
@@ -49,7 +50,6 @@ typedef struct Packet03ChatMessage {
 
 char * Packet03ChatMessage_encode(Packet03ChatMessage *data, size_t *len);
 Packet03ChatMessage * Packet03ChatMessage_parse(char *data, size_t len);
-
 void Packet03ChatMessage_free(Packet03ChatMessage *data);
 
 typedef struct Packet06SpawnPosition {
@@ -111,5 +111,15 @@ typedef struct Packet35BlockChange {
 char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len);
 void Packet35BlockChange_free(Packet35BlockChange *data);
 
-    
+/*
+ * Packet 0xFF Disconnect
+ */
+
+typedef struct PacketFFDisconnect {
+    char *reason;
+} PacketFFDisconnect;
+
+char *PacketFFDisconnect_encode(PacketFFDisconnect *data, size_t *len);
+PacketFFDisconnect *PacketFFDisconnect_parse(char *data, size_t len);
+void PacketFFDisconnect_free(PacketFFDisconnect *data);
 #endif
