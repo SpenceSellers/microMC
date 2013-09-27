@@ -8,6 +8,7 @@
 #define PACKET_KEEP_ALIVE 0x00
 #define PACKET_LOGIN_REQUEST 0x01
 #define PACKET_HANDSHAKE 0x02
+#define PACKET_CHAT_MESSAGE 0x03
 #define PACKET_SPAWN_POSITION 0x06
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
@@ -41,6 +42,15 @@ typedef struct Packet02Handshake {
 } Packet02Handshake;
 
 Packet02Handshake * Packet02Handshake_parse(char *data, size_t length);
+
+typedef struct Packet03ChatMessage {
+    char *str;
+} Packet03ChatMessage;
+
+char * Packet03ChatMessage_encode(Packet03ChatMessage *data, size_t *len);
+Packet03ChatMessage * Packet03ChatMessage_parse(char *data, size_t len);
+
+void Packet03ChatMessage_free(Packet03ChatMessage *data);
 
 typedef struct Packet06SpawnPosition {
     int x;

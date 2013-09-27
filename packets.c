@@ -95,6 +95,42 @@ void Packet01LoginRequest_free(Packet01LoginRequest *data){
     free(data->level_type);
     free(data);
 }
+/*
+ * Packet 0x03 Chat Message
+ */
+char * Packet03ChatMessage_encode(Packet03ChatMessage *data, size_t *len){
+    char * packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+
+    pos += write_char(PACKET_CHAT_MESSAGE, packet+pos);
+    size_t stringwrote;
+    char *mc_chatstring = encode_MCString(data->str, &stringwrote);
+    memcpy(packet+pos, mc_chatstring, stringwrote);
+    free(mc_chatstring);
+
+    *len = pos;
+    return packet;
+}
+Packet03ChatMessage * Packet03ChatMessage_parse(char *data, size_t len){
+    Packet03ChatMessage *chatpacket = malloc(sizeof(data));
+    size_t pos = 0;
+    if (read_char(data+pos, &pos) != PACKET_CHAT_MESSAGE){
+	logmsg(LOG_WARN, "This is not a Chat message packet!");
+	return NULL;
+    }
+    size_t read;
+    char * chatstring = decode_MCString(data+pos, &read);
+    chatpacket->str = chatstring;
+    return chatpacket;
+    
+}
+    
+	    
+
+void Packet03ChatMessage_free(Packet03ChatMessage *data){
+    free(data->str);
+    free(data);
+}
 
 /*
  * Packet 0x06 Spawn Position
