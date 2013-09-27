@@ -2,7 +2,9 @@
 #define PLAYER_H
 
 #include <pthread.h>
+#include "server.h"
 
+typedef struct Server Server; // Cyclic Redundancy fix
 typedef struct Player {
     char *username;
     int entity_id;
@@ -14,4 +16,5 @@ void Player_disconnect(Player *player);
 void Player_free(Player *player);
 
 void Player_send_keep_alive(Player *player);
+void Player_break_block(Player *player, Server *s,  int x, int y, int z);
 #endif

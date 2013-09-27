@@ -15,6 +15,7 @@ typedef struct Chunk {
 Chunk * Chunk_new_empty();
 
 void Chunk_set_block(Chunk *chunk, int x, int y, int z, Block block);
+Block Chunk_get_block(Chunk *chunk, int x, int y, int z);
 void Chunk_set_below(Chunk *chunk, Block b, int y);
 Chunk * Chunk_new_empty();
 

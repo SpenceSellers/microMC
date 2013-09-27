@@ -24,10 +24,13 @@ Chunk * Chunk_new_empty(){
 
 void Chunk_set_block(Chunk *chunk, int x, int y, int z, Block block){
     size_t blockpos = y * 256 + z * 16 + x;
-
     chunk->blocks[blockpos] = block;
 }
 
+Block Chunk_get_block(Chunk *chunk, int x, int y, int z){
+    size_t blockpos = y * 256 + z * 16 + x;
+    return chunk->blocks[blockpos];
+}
 void Chunk_set_below(Chunk *chunk, Block b, int y){
     int x;
     int z;
@@ -95,9 +98,17 @@ void Map_set_chunk(Map *map, Chunk *chunk, ssize_t x, ssize_t z){
 void Map_set_block(Map *map, Block block, int x, int y, int z){
     ssize_t chunkx = x / 16;
     ssize_t chunkz = z / 16;
+    printf("cx: %d, cz: %d, x: %d, z:%d \n", chunkx, chunkz, x, z);
 
     Chunk *chunk = Map_get_chunk(map, chunkx, chunkz);
+
+    
+    Block testb;
+    testb = Chunk_get_block(chunk, x%16, y, z%16);
+    printf("Block was: %d \n", testb.id);
     Chunk_set_block(chunk, x%16, y, z%16, block);
+    testb = Chunk_get_block(chunk, x%16, y, z%16);
+    printf("Block is now: %d \n", testb.id);
 }
 
 void Map_set_below(Map *map, Block b, int level){

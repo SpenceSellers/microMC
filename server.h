@@ -5,6 +5,9 @@
 #include "map.h"
 #include <pthread.h>
 #include <stdlib.h>
+#include "server.h"
+
+typedef struct Player Player; // For cyclic dependency prevention.
 
 typedef struct Server {
     pthread_rwlock_t state_lock;
@@ -53,4 +56,7 @@ void Server_remove_player(Server *server, Player *player);
 
 void Server_tick(Server *server);
 void Server_shutdown(Server *server);
+
+void Server_change_block(Server *server, Block b, int x, int y, int z);
+
 #endif

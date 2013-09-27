@@ -142,6 +142,33 @@ char * Packet0DPlayerPositionAndLook_encode(Packet0DPlayerPositionAndLook *data,
 void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data){
     free(data);
 }
+/*
+ * Packet 0x0E Player Digging
+ */
+
+Packet0EPlayerDigging *Packet0EPlayerDigging_parse(char *data, size_t len){
+    Packet0EPlayerDigging *packet =  malloc(sizeof(Packet0EPlayerDigging));
+    size_t pos = 0;
+    if (read_char(data + pos, &pos) != PACKET_PLAYER_DIGGING){
+	logmsg(LOG_WARN, "This is not a player digging packet!");
+	return NULL;
+    }
+    
+    packet->action = read_char(data + pos, &pos);
+    packet->x = read_int(data+pos, &pos);
+    packet->y = read_char(data+pos, &pos);
+    packet->z = read_int(data+pos, &pos);
+    packet->face = read_char(data+pos, &pos);
+
+
+    return packet;
+}
+    
+    
+void Packet0EPlayerDigging_free(Packet0EPlayerDigging *data){
+    free(data);
+}
+
     
 /* 
  * Packet 33 Chunk Data
@@ -189,9 +216,9 @@ char *construct_chunk_data(Chunk *chunk, size_t *len){
 			   chunk->blocks[i+1].metadata),
 	    data + pos);
     }
-    
+    // Lighting
     for (i=0; i < (16*16*256); i+= 2){
-	pos += write_char(17, data + pos);
+	pos += write_char(255, data + pos);
     }
     // We can skip the Add array.
     for (i=0; i < (16*16); i++){
@@ -211,7 +238,7 @@ char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
     packet.x = x;
     packet.z = z;
     packet.continuous = 1;
-    packet.bitmap = 65534; // All subchunks
+    packet.bitmap = 65535; // All subchunks
 
     size_t comp_len = 0;
 
@@ -228,4 +255,26 @@ char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len){
     logmsg(LOG_INFO, "Done constructing.");
     return final;
     
+}
+
+/*
+ * Packet 35 Block Change
+ */
+
+char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    int pos = 0;
+    pos += write_char(PACKET_BLOCK_CHANGE, packet+pos);
+    pos += write_int(data->x, packet+pos);
+    pos += write_char(data->y, packet+pos);
+    pos += write_int(data->z, packet+pos);
+    pos += write_short(data->id, packet+pos);
+    pos += write_char(data->metadata, packet+pos);
+
+    *len = pos;
+    return packet;
+}
+
+void Packet35BlockChange_free(Packet35BlockChange *data){
+    free(data);
 }

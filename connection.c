@@ -57,7 +57,7 @@ Player * handle_login(int sock){
     Packet01LoginRequest *loginreq = malloc(sizeof(Packet01LoginRequest));
     loginreq->entity_id = 10;
     loginreq->level_type = strdup("default");
-    loginreq->game_mode = 1; //0 is survival, 1 is creative.
+    loginreq->game_mode = 0; //0 is survival, 1 is creative.
     loginreq->difficulty = 2;
     loginreq->dimension = 0;
     loginreq->max_players = 50;
@@ -128,7 +128,19 @@ void send_all_chunks(Player *p, Map *map){
 	}
     }
 }
-	    
+
+void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
+    if (1){//packet->action == 2){
+	pthread_rwlock_wrlock(&s->map_lock);
+	pthread_rwlock_wrlock(&s->players_lock);
+	Player_break_block(p, s, packet->x, packet->y, packet->z);
+	pthread_rwlock_unlock(&s->map_lock);
+	pthread_rwlock_unlock(&s->players_lock);
+    } else {
+        printf("action = %d \n", packet->action); 
+    }
+    
+}
 struct ConnectionThreadArgs {
     int sock;
     Server *server;
@@ -171,6 +183,14 @@ void *connection_thread(void *args){
 	    pthread_exit(NULL);
 	    return;
 	}
+        //printf("Packet of type: %d \n", buffer[0]);
+	if (buffer[0] == PACKET_PLAYER_DIGGING){
+	    logmsg(LOG_DEBUG, "Player digging packet!");
+	    Packet0EPlayerDigging *pack = Packet0EPlayerDigging_parse(buffer, read);
+	    handle_player_digging(pack, player, server);
+	    Packet0EPlayerDigging_free(pack);
+	}
+	    
 	
     }
 }

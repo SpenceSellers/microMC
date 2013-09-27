@@ -81,3 +81,13 @@ void Server_shutdown(Server *server){
 	Player_disconnect(server->players[i]);
     }
 }
+
+void Server_change_block(Server *server, Block b, int x, int y, int z){
+    logmsg(LOG_DEBUG, "A block is being changed.");
+    Map_set_block(server->map, b, x, y, z);
+    int i;
+    for (i=0; i < server->num_players; i++){
+	Player_send_block_change(server->players[i], b, x, y, z);
+    }
+}
+    

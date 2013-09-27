@@ -32,6 +32,9 @@ int main(){
     b.metadata = 0;
     
     Map_set_below(map, b, 20);
+    
+    b.id=20; map->chunks[0]->blocks[0] = b; //Debugging
+    
     Server *server = Server_create(map, 10);
     sigint_server = server;
     server->is_running = 1;
