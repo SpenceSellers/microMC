@@ -74,3 +74,15 @@ void Player_send_message(Player *player, char *msg){
     free(packet);
     Packet03ChatMessage_free(chatmsg);
 }
+
+void Player_set_position(Player *player, double x, double y, double z){
+    double dx = x - player->x;
+    double dy = y - player->y;
+    double dz = z - player->z;
+
+    //if (dx < 4 || dy < 4 || dz < 4){
+	
+    player->x = x;
+    player->y = y;
+    player->z = z;
+}

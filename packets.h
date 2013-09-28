@@ -10,8 +10,11 @@
 #define PACKET_HANDSHAKE 0x02
 #define PACKET_CHAT_MESSAGE 0x03
 #define PACKET_SPAWN_POSITION 0x06
+#define PACKET_PLAYER_POSITION 0x0B
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
+#define PAKCET_PLAYER_BLOCK_PLACEMENT 0xOF
+#define PACKET_ENTITY_RELATIVE_MOVE 0x1F
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
 #define PACKET_DISCONNECT 0xFF
@@ -52,6 +55,9 @@ char * Packet03ChatMessage_encode(Packet03ChatMessage *data, size_t *len);
 Packet03ChatMessage * Packet03ChatMessage_parse(char *data, size_t len);
 void Packet03ChatMessage_free(Packet03ChatMessage *data);
 
+/*
+ * Packet 06 Spawn Position
+ */
 typedef struct Packet06SpawnPosition {
     int x;
     int y;
@@ -61,6 +67,20 @@ typedef struct Packet06SpawnPosition {
 char * Packet06SpawnPosition_encode(Packet06SpawnPosition *data, size_t *len);
 void Packet06SpawnPosition_free(Packet06SpawnPosition *data);
 
+/*
+ * Packet 0B Player Position
+ */
+typedef struct Packet0BPlayerPosition{
+    double x;
+    double y;
+    double stance;
+    double z;
+    char on_ground;
+} Packet0BPlayerPosition;
+
+Packet0BPlayerPosition * Packet0BPlayerPosition_parse(char *data, size_t len);
+void Packet0BPlayerPosition_free(Packet0BPlayerPosition *data);
+    
 typedef struct Packet0DPlayerPositionAndLook {
     double x;
     double y_stance; /* These variables are swapped depending on */
@@ -95,6 +115,15 @@ typedef struct Packet33ChunkData {
     int compressed_size;
     char *compressed_data;
 } Packet33ChunkData;
+/*
+ * Packet 0x1F Entity Relative Move
+ */
+typedef struct Packet1FEntityRelativeMove {
+    int id;
+    char dx;
+    char dy;
+    char dz;
+} Packet1FEntityRelativeMove;
 
 char * Packet33ChunkData_encode(Packet33ChunkData *data, size_t *len);
 void Packet33ChunkData_free(Packet33ChunkData *data);

@@ -136,3 +136,7 @@ void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
 	Player_disconnect(p, "Get outa here!");
     }
 }
+
+void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s){
+    Player_set_position(p, packet->x, packet->y, packet->z);
+}

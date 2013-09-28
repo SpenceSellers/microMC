@@ -13,7 +13,7 @@ typedef struct Server {
     pthread_rwlock_t state_lock;
     char is_running;
     long time;
-
+    
     size_t max_players;
     
     pthread_rwlock_t players_lock;

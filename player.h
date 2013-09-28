@@ -9,6 +9,10 @@ typedef struct Player {
     char *username;
     int entity_id;
     int socket;
+
+    double x;
+    double y;
+    double z;
     
 } Player;
 
@@ -19,5 +23,5 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z);
 
 void Player_send_keep_alive(Player *player);
 void Player_send_message(Player *player, char *msg);
-
+void Player_set_position(Player *player, double x, double y, double z);
 #endif

@@ -65,7 +65,6 @@ void *connection_thread(void *args){
 	}
         //printf("Packet of type: %d \n", buffer[0]);
 	if (buffer[0] == PACKET_PLAYER_DIGGING){
-	    logmsg(LOG_DEBUG, "Player digging packet!");
 	    Packet0EPlayerDigging *pack = Packet0EPlayerDigging_parse(buffer, read);
 	    handle_player_digging(pack, player, server);
 	    Packet0EPlayerDigging_free(pack);
@@ -73,6 +72,10 @@ void *connection_thread(void *args){
 	    Packet03ChatMessage *pack = Packet03ChatMessage_parse(buffer, read);
 	    handle_player_chat(pack, player, server);
 	    Packet03ChatMessage_free(pack);
+	} else if (buffer[0] == PACKET_PLAYER_POSITION){
+	    Packet0BPlayerPosition *pack = Packet0BPlayerPosition_parse(buffer, read);
+	    handle_player_position(pack, player, server);
+	    Packet0BPlayerPosition_free(pack);
 	}
 	
     }

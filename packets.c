@@ -154,7 +154,27 @@ char * Packet06SpawnPosition_encode(Packet06SpawnPosition *data, size_t *len){
 void Packet06SpawnPosition_free(Packet06SpawnPosition *data){
     free(data);
 }
-
+/*
+ * Packet 0B Player Position
+ */
+Packet0BPlayerPosition * Packet0BPlayerPosition_parse(char *data, size_t len){
+    Packet0BPlayerPosition *player_pos = malloc(sizeof(player_pos));
+    size_t pos = 0;
+    if (read_char(data + pos, &pos) != PACKET_PLAYER_POSITION){
+	logmsg(LOG_WARN, "This is not a Player Position packet!");
+	return NULL;
+    }
+    player_pos->x = read_double(data+pos, &pos);
+    player_pos->y = read_double(data+pos, &pos);
+    player_pos->stance = read_double(data+pos, &pos);
+    player_pos->z = read_double(data+pos, &pos);
+    player_pos->on_ground = read_char(data+pos, &pos);
+    return player_pos;
+}
+void Packet0BPlayerPosition_free(Packet0BPlayerPosition *data){
+    free(data);
+}
+	
 /*
  * Packet 0x0D Player Position and Look
  */
