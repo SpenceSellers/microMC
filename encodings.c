@@ -168,3 +168,10 @@ char * fake_json_chat(char *str){
     return fake_json;
 }
     
+int to_fixed_point(double d){
+    return (int) (d*32);
+}
+
+double from_fixed_point(int i){
+    return ((double) i)/32;
+}

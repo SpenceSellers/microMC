@@ -158,7 +158,7 @@ void Packet06SpawnPosition_free(Packet06SpawnPosition *data){
  * Packet 0B Player Position
  */
 Packet0BPlayerPosition * Packet0BPlayerPosition_parse(char *data, size_t len){
-    Packet0BPlayerPosition *player_pos = malloc(sizeof(player_pos));
+    Packet0BPlayerPosition *player_pos = malloc(sizeof(Packet0BPlayerPosition));
     size_t pos = 0;
     if (read_char(data + pos, &pos) != PACKET_PLAYER_POSITION){
 	logmsg(LOG_WARN, "This is not a Player Position packet!");
@@ -226,8 +226,79 @@ Packet0EPlayerDigging *Packet0EPlayerDigging_parse(char *data, size_t len){
 void Packet0EPlayerDigging_free(Packet0EPlayerDigging *data){
     free(data);
 }
+/*
+ * Packet 0x14 Spawn Named Entity
+ */
+char * Packet14SpawnNamedEntity_encode(Packet14SpawnNamedEntity *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_SPAWN_NAMED_ENTITY, packet+pos);
+    pos += write_int(data->id, packet+pos);
 
-    
+    size_t stringwrote;
+    char *mc_player_name = encode_MCString(data->player_name, &stringwrote);
+    memcpy(packet+pos, mc_player_name, stringwrote);
+    free(mc_player_name);
+    pos += stringwrote;
+
+    pos += write_int(data->x_fixedp, packet+pos);
+    pos += write_int(data->y_fixedp, packet+pos);
+    pos += write_int(data->z_fixedp, packet+pos);
+    pos += write_char(data->yaw, packet+pos);
+    pos += write_char(data->pitch, packet+pos);
+    pos += write_short(data->held_item, packet+pos);
+    pos += write_char(0, packet+pos); // TEMPORARY
+    pos += write_char(0, packet+pos);
+    pos += write_char(0x7F, packet+pos);
+
+    *len = pos;
+    return packet;
+}
+void Packet14SpawnNamedEntity_free(Packet14SpawnNamedEntity *data){
+    free(data->player_name);
+    free(data);
+    // TODO add metadata
+}
+/*
+ * Packet 0x1F Entity Relative Move
+ */
+char * Packet1FEntityRelativeMove_encode(Packet1FEntityRelativeMove *data,
+					 size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_ENTITY_RELATIVE_MOVE, packet+pos);
+    pos += write_int(data->id, packet+pos);
+    pos += write_char(data->dx, packet+pos);
+    pos += write_char(data->dy, packet+pos);
+    pos += write_char(data->dz, packet+pos);
+
+    *len = pos;
+    return packet;
+}
+void Packet1FEntityRelativeMove_free(Packet1FEntityRelativeMove *data){
+    free(data);
+}
+
+/*
+ * Packet 0x22 Entity Teleport
+ */
+char * Packet22EntityTeleport_encode(Packet22EntityTeleport *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
+    size_t pos = 0;
+    pos += write_char(PACKET_ENTITY_TELEPORT, packet+pos);
+    pos += write_int(data->id, packet+pos);
+    pos += write_int(data->x_f, packet+pos);
+    pos += write_int(data->y_f, packet+pos);
+    pos += write_int(data->z_f, packet+pos);
+    pos += write_char(data->yaw, packet+pos);
+    pos += write_char(data->pitch, packet+pos);
+    *len = pos;
+    return packet;
+}
+void Packet22EntityTeleport_free(Packet22EntityTeleport *data){
+    free(data);
+}
+	
 /* 
  * Packet 33 Chunk Data
  */
@@ -345,9 +416,11 @@ char *PacketFFDisconnect_encode(PacketFFDisconnect *data, size_t *len){
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
     size_t pos = 0;
     pos += write_char(PACKET_DISCONNECT, packet+pos);
-    size_t reason_len;
+    size_t reason_len=0;
     char *mc_reason = encode_MCString(data->reason, &reason_len);
     memcpy(packet+pos, mc_reason, reason_len);
+    
+    pos += reason_len;
     free(mc_reason);
 
     *len = pos;

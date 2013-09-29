@@ -49,6 +49,7 @@ void *connection_thread(void *args){
     send_all_chunks(player, server->map);
     pthread_rwlock_unlock(&server->map_lock);
     
+    send_all_players(player, server);
     // General play loop.
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);

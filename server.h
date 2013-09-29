@@ -13,6 +13,10 @@ typedef struct Server {
     pthread_rwlock_t state_lock;
     char is_running;
     long time;
+    int last_entity_id;
+    int spawnx;
+    int spawny;
+    int spawnz;
     
     size_t max_players;
     
@@ -42,7 +46,7 @@ char Server_is_full(Server *server);
 
 /* Adds a player to the server.
  * 
- * This function will probably require the players_lock mutex
+ * This function will probably require the players_lock and state_lock mutex
  * to be locked for writing.
  */
 void Server_add_player(Server *server, Player *player);
@@ -58,5 +62,8 @@ void Server_tick(Server *server);
 void Server_shutdown(Server *server);
 
 void Server_change_block(Server *server, Block b, int x, int y, int z);
-
+/* Sends a message to every player on the server.
+ * Requires players_lock to be read-locked.
+ */
+void Server_tell_all(Server *server, char *message);
 #endif

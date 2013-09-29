@@ -35,7 +35,9 @@ Player * handle_login(int sock, Server *s){
     Player *player = malloc(sizeof(Player));
     player->username = playername;
     player->socket = sock;
-    
+    player->x = (double) s->spawnx;
+    player->y = (double) s->spawny;
+    player->z = (double) s->spawnz;
     /*
      * Login Request
      */
@@ -59,9 +61,9 @@ Player * handle_login(int sock, Server *s){
     if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");
 
     Packet06SpawnPosition *spawnpos = malloc(sizeof(spawnpos));
-    spawnpos->x = 0;
-    spawnpos->y = 64;
-    spawnpos->z = 0;
+    spawnpos->x = s->spawnx;
+    spawnpos->y = s->spawny;
+    spawnpos->z = s->spawnz;
 
     char *data2;
     data2 = Packet06SpawnPosition_encode(spawnpos, &packlen);
@@ -100,6 +102,7 @@ Player * handle_login(int sock, Server *s){
 }
 
 void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
+    printf("%s just broke a block.\n", p->username);
     if (1){//packet->action == 2){
 	pthread_rwlock_wrlock(&s->map_lock);
 	pthread_rwlock_wrlock(&s->players_lock);
@@ -128,10 +131,22 @@ void send_all_chunks(Player *p, Map *map){
     }
 }
 
+void send_all_players(Player *player, Server *server){
+    pthread_rwlock_rdlock(&server->players_lock);
+    int i;
+    for (i=0; i < server->num_players; i++){
+	if (player == server->players[i]) continue;
+	Player_send_new_player(player, server->players[i]);
+    }
+    pthread_rwlock_unlock(&server->players_lock);
+}
+	
 
 void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
-    printf("Player said: %s \n", packet->str);
-    Player_send_message(p, packet->str);
+    pthread_rwlock_rdlock(&s->players_lock);
+    Server_tell_all(s, packet->str);
+    pthread_rwlock_unlock(&s->players_lock);
+    
     if (strcmp(packet->str, "/kickme") == 0){
 	Player_disconnect(p, "Get outa here!");
     }

@@ -13,11 +13,14 @@
 #define PACKET_PLAYER_POSITION 0x0B
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
-#define PAKCET_PLAYER_BLOCK_PLACEMENT 0xOF
+#define PACKET_PLAYER_BLOCK_PLACEMENT 0xOF
+#define PACKET_SPAWN_NAMED_ENTITY 0x14
 #define PACKET_ENTITY_RELATIVE_MOVE 0x1F
+#define PACKET_ENTITY_TELEPORT 0x22
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
 #define PACKET_DISCONNECT 0xFF
+
 void debug_print_hex_string(char *str, size_t len);
 typedef struct Packet00KeepAlive {
     int id;
@@ -107,14 +110,24 @@ Packet0EPlayerDigging *Packet0EPlayerDigging_parse(char *data, size_t len);
 
 void Packet0EPlayerDigging_free(Packet0EPlayerDigging *data);
 
-typedef struct Packet33ChunkData {
-    int x;
-    int z;
-    char continuous;
-    unsigned short bitmap;
-    int compressed_size;
-    char *compressed_data;
-} Packet33ChunkData;
+/*
+ * Packet 0x14 Spawn Named Entity
+ */
+typedef struct Packet14SpawnNamedEntity {
+    int id;
+    char *player_name;
+    int x_fixedp;
+    int y_fixedp;
+    int z_fixedp;
+    char yaw;
+    char pitch;
+    short held_item; // Defaults to zero!
+    char metadata; // TEMPORARY
+} Packet14SpawnNamedEntity;
+
+char * Packet14SpawnNamedEntity_encode(Packet14SpawnNamedEntity *data, size_t *len);
+void Packet14SpawnNamedEntity_free(Packet14SpawnNamedEntity *data);
+    
 /*
  * Packet 0x1F Entity Relative Move
  */
@@ -125,10 +138,42 @@ typedef struct Packet1FEntityRelativeMove {
     char dz;
 } Packet1FEntityRelativeMove;
 
+char * Packet1FEntityRelativeMove_encode(Packet1FEntityRelativeMove *data,
+					 size_t *len);
+void Packet1FEntityRelativeMove_free(Packet1FEntityRelativeMove *data);
+
+/*
+ * Packet 0x1F Entity Teleport
+ */
+typedef struct Packet22EntityTeleport {
+    int id;
+    int x_f;
+    int y_f;
+    int z_f;
+    char yaw;
+    char pitch;
+} Packet22EntityTeleport;
+
+char * Packet22EntityTeleport_encode(Packet22EntityTeleport *data, size_t *len);
+void Packet22EntityTeleport_free(Packet22EntityTeleport *data);
+
+/*
+ * Packet 0x33 Chunk Data
+ */
+typedef struct Packet33ChunkData {
+    int x;
+    int z;
+    char continuous;
+    unsigned short bitmap;
+    int compressed_size;
+    char *compressed_data;
+} Packet33ChunkData;
 char * Packet33ChunkData_encode(Packet33ChunkData *data, size_t *len);
 void Packet33ChunkData_free(Packet33ChunkData *data);
 char *Packet33ChunkData_construct(Chunk *chunk, int x, int z, size_t *len);
-
+/*
+ * Packet 0x33 Block Change
+ */
 typedef struct Packet35BlockChange {
     int x;
     char y;

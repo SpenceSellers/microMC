@@ -31,7 +31,7 @@ int main(){
     b.id = 1;
     b.metadata = 0;
     
-    Map_set_below(map, b, 20);
+    Map_set_below(map, b, 60);
     
     b.id=20; map->chunks[0]->blocks[0] = b; //Debugging
     
@@ -49,8 +49,11 @@ int main(){
     sleeptime.tv_sec = 0;
     sleeptime.tv_nsec = 50000000; // 50 ms.
     while (server->is_running){
-	//logmsg(LOG_DEBUG, "Tick!");
+	pthread_rwlock_wrlock(&server->state_lock);
+	pthread_rwlock_wrlock(&server->players_lock);
 	Server_tick(server);
+	pthread_rwlock_unlock(&server->state_lock);
+	pthread_rwlock_unlock(&server->players_lock);
 	nanosleep(&sleeptime, NULL);
     }
     pthread_join(server->distributor_thread, NULL);

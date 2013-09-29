@@ -35,4 +35,8 @@ double swap_double_endian(double f);
 char pack_halfchars(char a, char b);
 
 char * fake_json_chat(char *str);
+
+int to_fixed_point(double d);
+double from_fixed_point(int i);
+
 #endif
