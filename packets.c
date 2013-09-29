@@ -209,6 +209,7 @@ Packet0EPlayerDigging *Packet0EPlayerDigging_parse(char *data, size_t len){
     size_t pos = 0;
     if (read_char(data + pos, &pos) != PACKET_PLAYER_DIGGING){
 	logmsg(LOG_WARN, "This is not a player digging packet!");
+	free(packet);
 	return NULL;
     }
     
@@ -227,9 +228,43 @@ void Packet0EPlayerDigging_free(Packet0EPlayerDigging *data){
     free(data);
 }
 /*
+ * Packet 0x0F Player Block Placement
+ */
+Packet0FPlayerBlockPlacement * Packet0FPlayerBlockPlacement_parse(char *data,
+								  size_t len){
+    size_t pos = 0;
+    if (read_char(data + pos, &pos) != PACKET_PLAYER_BLOCK_PLACEMENT){
+	logmsg(LOG_WARN, "This is not a block placement packet!");
+	return NULL;
+    }
+    Packet0FPlayerBlockPlacement *pbp =
+	malloc(sizeof(Packet0FPlayerBlockPlacement));
+    pbp->x = read_int(data+pos, &pos);
+    pbp->y = read_char(data+pos, &pos);
+    pbp->z = read_int(data+pos, &pos);
+    pbp->direction = read_char(data+pos, &pos);
+    
+    size_t slotread;
+    pbp->held_item = Slot_read(data+pos, &slotread);
+    pos += slotread;
+    logmsg(LOG_DEBUG, "Done reading slot data!");
+    
+    pbp->c_posx = read_char(data+pos, &pos);
+    pbp->c_posy = read_char(data+pos, &pos);
+    pbp->c_posz = read_char(data+pos, &pos);
+    logmsg(LOG_DEBUG, "Done reading block placement!");
+    return pbp;
+}
+
+void Packet0FPlayerBlockPlacement_free(Packet0FPlayerBlockPlacement *data){
+    Slot_free(data->held_item);
+    free(data);
+}
+/*
  * Packet 0x14 Spawn Named Entity
  */
-char * Packet14SpawnNamedEntity_encode(Packet14SpawnNamedEntity *data, size_t *len){
+char * Packet14SpawnNamedEntity_encode(Packet14SpawnNamedEntity *data,
+				       size_t *len){
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
     size_t pos = 0;
     pos += write_char(PACKET_SPAWN_NAMED_ENTITY, packet+pos);

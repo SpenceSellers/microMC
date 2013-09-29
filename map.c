@@ -99,12 +99,11 @@ void Map_set_block(Map *map, Block block, int x, int y, int z){
     ssize_t chunkz = z / 16;
 
     Chunk *chunk = Map_get_chunk(map, chunkx, chunkz);
-
-    
-    Block testb;
-    testb = Chunk_get_block(chunk, x%16, y, z%16);
+    if (chunk == NULL){
+	logmsg(LOG_WARN, "Tried to set block that is outside of map!");
+	return;
+    }
     Chunk_set_block(chunk, x%16, y, z%16, block);
-    testb = Chunk_get_block(chunk, x%16, y, z%16);
 }
 
 void Map_set_below(Map *map, Block b, int level){
@@ -119,4 +118,25 @@ void Map_set_below(Map *map, Block b, int level){
     }
 }
 
-
+void apply_face(char face, int *x, int *y, int *z){
+    switch (face){
+    case 0:
+	*y -= 1;
+	break;
+    case 1:
+	*y += 1;
+	break;
+    case 2:
+	*z -= 1;
+	break;
+    case 3:
+	*z += 1;
+	break;
+    case 4:
+	*x -= 1;
+	break;
+    case 5:
+	*x += 1;
+	break;
+    }
+}

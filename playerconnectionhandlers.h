@@ -11,4 +11,7 @@ void send_all_chunks(Player *p, Map *map);
 void send_all_players(Player *player, Server *server);
 void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s);
 void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s);
+void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
+			    Player *p, Server *s);
+
 #endif

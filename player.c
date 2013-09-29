@@ -51,7 +51,6 @@ void Player_send_block_change(Player *player, Block b, int x, int y, int z){
     send(player->socket, data, len, 0);
     Packet35BlockChange_free(packet);
     free(data);
-    
 }
 
 void Player_break_block(Player *player, Server *s,  int x, int y, int z){
@@ -62,6 +61,14 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z){
     //Map_set_block(s->map, air, x, y, z);
 
     Server_change_block(s, air, x, y, z);
+}
+
+void Player_place_block(Player *player, Server *s, int x, int y, int z){
+    logmsg(LOG_DEBUG, "Player is placing a block!");
+    Block dirt;
+    dirt.id = 2;
+    dirt.metadata = 0;
+    Server_change_block(s, dirt, x, y, z);
 }
 
 void Player_send_message(Player *player, char *msg){

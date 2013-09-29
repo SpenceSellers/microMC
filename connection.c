@@ -69,14 +69,23 @@ void *connection_thread(void *args){
 	    Packet0EPlayerDigging *pack = Packet0EPlayerDigging_parse(buffer, read);
 	    handle_player_digging(pack, player, server);
 	    Packet0EPlayerDigging_free(pack);
+	    
 	} else if (buffer[0] == PACKET_CHAT_MESSAGE){
 	    Packet03ChatMessage *pack = Packet03ChatMessage_parse(buffer, read);
 	    handle_player_chat(pack, player, server);
 	    Packet03ChatMessage_free(pack);
+	    
 	} else if (buffer[0] == PACKET_PLAYER_POSITION){
-	    Packet0BPlayerPosition *pack = Packet0BPlayerPosition_parse(buffer, read);
+	    Packet0BPlayerPosition *pack =
+		Packet0BPlayerPosition_parse(buffer, read);
 	    handle_player_position(pack, player, server);
 	    Packet0BPlayerPosition_free(pack);
+	    
+	} else if (buffer[0] == PACKET_PLAYER_BLOCK_PLACEMENT){
+	    Packet0FPlayerBlockPlacement *pack =
+		Packet0FPlayerBlockPlacement_parse(buffer, read);
+	    handle_block_placement(pack, player, server);
+	    Packet0FPlayerBlockPlacement_free(pack);
 	}
 	
     }

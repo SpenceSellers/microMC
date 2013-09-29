@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "player.h"
 #include "map.h"
-
+#include "inventory.h"
 #define PACKET_KEEP_ALIVE 0x00
 #define PACKET_LOGIN_REQUEST 0x01
 #define PACKET_HANDSHAKE 0x02
@@ -13,7 +13,7 @@
 #define PACKET_PLAYER_POSITION 0x0B
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
-#define PACKET_PLAYER_BLOCK_PLACEMENT 0xOF
+#define PACKET_PLAYER_BLOCK_PLACEMENT 0x0F
 #define PACKET_SPAWN_NAMED_ENTITY 0x14
 #define PACKET_ENTITY_RELATIVE_MOVE 0x1F
 #define PACKET_ENTITY_TELEPORT 0x22
@@ -97,7 +97,9 @@ typedef struct Packet0DPlayerPositionAndLook {
 char * Packet0DPlayerPositionAndLook_encode(Packet0DPlayerPositionAndLook *data,
 					    size_t *len);
 void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data);
-
+/*
+ * Packet 0x0E Player Digging
+ */
 typedef struct Packet0EPlayerDigging {
     char action;
     int x;
@@ -109,7 +111,24 @@ typedef struct Packet0EPlayerDigging {
 Packet0EPlayerDigging *Packet0EPlayerDigging_parse(char *data, size_t len);
 
 void Packet0EPlayerDigging_free(Packet0EPlayerDigging *data);
+/*
+ * Packet 0x0F Player Block Placement
+ */
+typedef struct Packet0FPlayerBlockPlacement {
+    int x;
+    unsigned char y;
+    int z;
+    char direction;
+    Slot *held_item;
+    // Crosshair positions on block.
+    char c_posx;
+    char c_posy;
+    char c_posz;
+} Packet0FPlayerBlockPlacement;
 
+Packet0FPlayerBlockPlacement * Packet0FPlayerBlockPlacement_parse(char *data,
+								  size_t len);
+void Packet0FPlayerBlockPlacement_free(Packet0FPlayerBlockPlacement *data);
 /*
  * Packet 0x14 Spawn Named Entity
  */

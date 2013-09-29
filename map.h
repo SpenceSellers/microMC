@@ -43,4 +43,8 @@ void Map_set_chunk(Map *map, Chunk *chunk, ssize_t x, ssize_t z);
 
 void Map_set_block(Map *map, Block block, int x, int y, int z);
 
+/* Applies the "face" byte onto position coordinates.
+ * These WILL probably need to be checked for santiy afterwards.
+ */
+void apply_face(char face, int *x, int *y, int *z);
 #endif

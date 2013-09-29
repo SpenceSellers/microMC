@@ -155,3 +155,14 @@ void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
 void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s){
     Player_set_position(p, packet->x, packet->y, packet->z);
 }
+
+void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
+			    Player *p, Server *s){
+    logmsg(LOG_DEBUG, "Player is placing block!");
+    int x = packet->x;
+    int y = packet->y;
+    int z = packet->z;
+
+    apply_face(packet->direction, &x, &y, &z);
+    Player_place_block(p, s, x,y,z);
+}
