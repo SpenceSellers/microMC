@@ -60,7 +60,7 @@ Player * handle_login(int sock, Server *s){
 
     if (sent != packlen) logmsg(LOG_ERROR, "NOT ENOUGH DATA SENT");
 
-    Packet06SpawnPosition *spawnpos = malloc(sizeof(spawnpos));
+    Packet06SpawnPosition *spawnpos = malloc(sizeof(Packet06SpawnPosition));
     spawnpos->x = s->spawnx;
     spawnpos->y = s->spawny;
     spawnpos->z = s->spawnz;

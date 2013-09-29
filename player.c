@@ -16,7 +16,8 @@ void Player_disconnect(Player *player, char * reason){
     }
     size_t len;
     char *packet = PacketFFDisconnect_encode(disconnect, &len);
-    send(player->socket, packet, &len, 0);
+    printf("Disconnect of size: %d \n", len);
+    send(player->socket, packet, len, 0);
     PacketFFDisconnect_free(disconnect);
     free(packet);
     close(player->socket);

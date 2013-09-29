@@ -10,6 +10,11 @@ char * decode_MCString(char *mcstring, size_t *read);
  */
 char * encode_MCString(char *string, size_t *len);
 
+/* Returns the size of the c-string which will be returned by
+ * encode_MCString.
+ */
+size_t encoded_MCString_len(char *string);
+
 size_t write_int(int i, char *place);
 size_t write_short(short s, char *place);
 size_t write_char(char c, char *place);

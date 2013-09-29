@@ -413,10 +413,15 @@ void Packet35BlockChange_free(Packet35BlockChange *data){
  */
 
 char *PacketFFDisconnect_encode(PacketFFDisconnect *data, size_t *len){
+    if (1 + encoded_MCString_len(data->reason) > PACKET_BUFFER_SIZE){
+	logmsg(LOG_WARN, "Packet buffer too small for disconnect packet!");
+	return NULL;
+    }
     char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE);
     size_t pos = 0;
     pos += write_char(PACKET_DISCONNECT, packet+pos);
-    size_t reason_len=0;
+    
+    size_t reason_len;
     char *mc_reason = encode_MCString(data->reason, &reason_len);
     memcpy(packet+pos, mc_reason, reason_len);
     

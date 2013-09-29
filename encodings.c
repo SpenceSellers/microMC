@@ -58,6 +58,10 @@ char * encode_MCString(char *string, size_t *len){
     return mcstring;
 }
 
+size_t encoded_MCString_len(char *string){
+    size_t slen = strlen(string);
+    return 2 + (slen * 2);
+}
 size_t write_int(int i, char *place){
     int bige_int = htonl(i);
     *(int*) place = bige_int;
