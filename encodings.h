@@ -2,6 +2,12 @@
 #define ENCODINGS_H
 #include <stdlib.h>
 
+#define SIZE_SHORT 2
+#define SIZE_BYTE 1
+#define SIZE_INT 4
+#define SIZE_FLOAT 4
+#define SIZE_DOUBLE 8
+
 char * decode_MCString(char *mcstring, size_t *read);
 
 /*
