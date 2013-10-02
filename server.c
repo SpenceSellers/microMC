@@ -2,6 +2,7 @@
 #include "logging.h"
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 void debug_list_players(Server *server){
     int i;
     printf("%d players logged in.\n", server->num_players);

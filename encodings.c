@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include <zlib.h>
-
+#include <arpa/inet.h>
 char * decode_MCString(char *mcstring, size_t *read){
     logmsg(LOG_DEBUG, "Parsing a Minecraft String.");
     // Endianness conversion...
@@ -92,7 +92,7 @@ size_t write_double(double d, char *place){
 
 size_t write_compressed(char *data, size_t len, char *place, size_t maxlen){
     size_t written = maxlen;
-    int e = compress(place, &written, data, len);
+    int e = compress((unsigned char *) place, &written,(Bytef *) data, len);
     if (e == Z_MEM_ERROR){
 	logmsg(LOG_ERROR, "Not enough memory given to compress data!");
     }

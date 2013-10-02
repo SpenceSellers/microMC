@@ -58,6 +58,7 @@ int main(){
     }
     pthread_join(server->distributor_thread, NULL);
     logmsg(LOG_INFO, "Server shutting down!");
-    
+
+    return 0;
 }
 

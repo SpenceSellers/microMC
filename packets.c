@@ -46,7 +46,7 @@ Packet02Handshake * Packet02Handshake_parse(char *data, size_t length){
     packet->server_name = decode_MCString(data+pos, &read);
     pos += read;
     
-    packet->server_port = ntohl(*(int* )(data + pos));
+    packet->server_port = read_int(data + pos, &read);
     
     return packet;
 }

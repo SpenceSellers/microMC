@@ -5,6 +5,8 @@
 #include <math.h>
 #include "logging.h"
 #include "encodings.h"
+#include <unistd.h>
+#include <netinet/in.h>
 #include "map.h"
 
 void Player_disconnect(Player *player, char * reason){
@@ -16,7 +18,6 @@ void Player_disconnect(Player *player, char * reason){
     }
     size_t len;
     char *packet = PacketFFDisconnect_encode(disconnect, &len);
-    printf("Disconnect of size: %d \n", len);
     send(player->socket, packet, len, 0);
     PacketFFDisconnect_free(disconnect);
     free(packet);

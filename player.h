@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 #include "server.h"
-
+#include "map.h"
 typedef struct Server Server; // Cyclic Redundancy fix
 typedef struct Player {
     char *username;
@@ -27,6 +27,7 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z);
 void Player_place_block(Player *player, Server *s, int x, int y, int z);
 
 void Player_send_keep_alive(Player *player);
+void Player_send_block_change(Player *player, Block b, int x, int y, int z);
 void Player_send_message(Player *player, char *msg);
 void Player_set_position(Player *player, double x, double y, double z);
 void Player_send_new_player(Player *player, Player *newplayer);

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <limits.h>
+#include <unistd.h>
 
 #define BUFFERSIZE 1024
 

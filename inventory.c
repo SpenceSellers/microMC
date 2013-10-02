@@ -96,6 +96,7 @@ Slot * Slot_new_empty(){
     slot->damage = 0;
     slot->nbt_len = -1;
     slot->nbt = NULL;
+    return slot;
 }
 
 Slot * Slot_new_basic(short id, char count, short damage){

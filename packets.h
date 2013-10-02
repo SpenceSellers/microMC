@@ -49,7 +49,7 @@ typedef struct Packet02Handshake {
 } Packet02Handshake;
 
 Packet02Handshake * Packet02Handshake_parse(char *data, size_t length);
-
+void Packet02Handshake_free(struct Packet02Handshake *packet);
 typedef struct Packet03ChatMessage {
     char *str;
 } Packet03ChatMessage;

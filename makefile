@@ -1,6 +1,6 @@
 LIBS = -lpthread -lm -lz
 
-CC = gcc
+CC = gcc -std=gnu99 -Wall
 
 DEBUG ?= 0
 ifeq ($(DEBUG), 1)

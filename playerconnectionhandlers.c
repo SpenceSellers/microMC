@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <netinet/in.h>
 
 #define BUFFERSIZE 2048
 Player * handle_login(int sock, Server *s){
