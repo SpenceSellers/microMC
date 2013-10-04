@@ -13,5 +13,5 @@ void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s);
 void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s);
 void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
 			    Player *p, Server *s);
-
+void handle_item_change(Packet10HeldItemChange *packet, Player *p, Server *s);
 #endif

@@ -1,5 +1,6 @@
 #include "playerconnectionhandlers.h"
 #include "logging.h"
+#include "inventory.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,7 +27,7 @@ Player * handle_login(int sock, Server *s){
 
     /* Copy username over to the Player struct.
      * The packet struct's username string will be freed, so
-     * It the pointer can't just be transferred.
+     * the pointer can't just be transferred.
      */
     size_t username_length = strlen(handshake->username) + 1;
     char *playername = malloc(sizeof(char) * username_length);
@@ -40,6 +41,10 @@ Player * handle_login(int sock, Server *s){
     player->x = (double) s->spawnx;
     player->y = (double) s->spawny;
     player->z = (double) s->spawnz;
+
+    player->inventory = Inventory_new_empty(45);
+    player->held_slot_num = 0;
+    
     /*
      * Login Request
      */
@@ -167,4 +172,9 @@ void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
 
     apply_face(packet->direction, &x, &y, &z);
     Player_place_block(p, s, x,y,z);
+}
+
+void handle_item_change(Packet10HeldItemChange *packet, Player *p, Server *s){
+    logmsg(LOG_DEBUG, "Player is changing slot.");
+    p->held_slot_num = packet->slot_id;
 }

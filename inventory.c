@@ -75,18 +75,19 @@ char * Slot_encode(Slot *slot, size_t *len){
     return data;
 }
 	
-	
+size_t Slot_encoded_size(Slot *slot){
+    return SIZE_SHORT + SIZE_BYTE + SIZE_SHORT + SIZE_SHORT + slot->nbt_len;
+}
+
 void Slot_free(Slot *slot){
     if (slot->nbt != NULL) free(slot->nbt);
     free(slot);
 }
 
 char Slot_is_empty(Slot *slot){
-    if (slot->id == -1){
-	return 1;
-    } else {
-	return 0;
-    }
+    if (slot->id == -1) return 1;
+    if (slot->count <= 0) return 1;
+    return 0;
 }
 
 Slot * Slot_new_empty(){
@@ -107,6 +108,13 @@ Slot * Slot_new_basic(short id, char count, short damage){
     slot->nbt_len = -1;
     slot->nbt = NULL;
     return slot;
+}
+
+int Slot_can_add(Slot *slot, Slot *other){
+    if (slot->id != other->id) return 0;
+    if (slot->damage != other->damage) return 0;
+    if (slot->count + other->count > 64) return 0;
+    return 1;
 }
 
 Inventory * Inventory_new_empty(size_t size){
@@ -132,5 +140,19 @@ void Inventory_set(Inventory *inv, Slot *slot, size_t index){
 
     inv->slots[index] = slot;
 }
-  
+Slot *Inventory_get(Inventory *inv, size_t index){
+    return inv->slots[index];
+}
+int Inventory_player_add_item(Inventory *inv, Slot *slot){
+    // Check the hotbar.
+    int i;
+    for (i=36; i < 45; i++){
+	if (Slot_is_empty(inv->slots[i])){
+	    Inventory_set(inv, slot, i);
+	    return 1;
+	}
+    }
+    return 0;
+    
+}
     

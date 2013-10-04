@@ -261,6 +261,23 @@ void Packet0FPlayerBlockPlacement_free(Packet0FPlayerBlockPlacement *data){
     free(data);
 }
 /*
+ * Packet 0x10 Held Item Change
+ */
+Packet10HeldItemChange * Packet10HeldItemChange_parse(char *data, size_t len){
+    size_t pos = 0;
+    if (read_char(data+pos, &pos) != PACKET_HELD_ITEM_CHANGE){
+	logmsg(LOG_WARN, "This is not a Held Item Change Packet!");
+	return NULL;
+    }
+    Packet10HeldItemChange *itemchange = malloc(sizeof(Packet10HeldItemChange));
+    itemchange->slot_id = read_short(data+pos, &pos);
+    return itemchange;
+}
+    
+void Packet10HeldItemChange_free(Packet10HeldItemChange *data){
+    free(data);
+}
+/*
  * Packet 0x14 Spawn Named Entity
  */
 char * Packet14SpawnNamedEntity_encode(Packet14SpawnNamedEntity *data,
@@ -441,6 +458,24 @@ char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len){
 
 void Packet35BlockChange_free(Packet35BlockChange *data){
     free(data);
+}
+/*
+ * Packet 0x67 Set Slot
+ */
+char * Packet67SetSlot_encode(Packet67SetSlot *data, size_t *len){
+    char *packet = malloc(sizeof(char) * PACKET_BUFFER_SIZE + Slot_encoded_size(data->slot));
+    size_t pos = 0;
+    pos += write_char(PACKET_SET_SLOT, packet+pos);
+    pos += write_char(data->window_id, packet+pos);
+    pos += write_short(data->slot_id, packet+pos);
+
+    size_t slotlen;
+    char *slotdata = Slot_encode(data->slot, &slotlen);
+    memcpy(packet+pos, slotdata, slotlen);
+    pos += slotlen;
+    *len = pos;
+    free(slotdata);
+    return packet;
 }
 
 /*

@@ -14,11 +14,13 @@
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
 #define PACKET_PLAYER_BLOCK_PLACEMENT 0x0F
+#define PACKET_HELD_ITEM_CHANGE 0x10
 #define PACKET_SPAWN_NAMED_ENTITY 0x14
 #define PACKET_ENTITY_RELATIVE_MOVE 0x1F
 #define PACKET_ENTITY_TELEPORT 0x22
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
+#define PACKET_SET_SLOT 0x67
 #define PACKET_DISCONNECT 0xFF
 
 void debug_print_hex_string(char *str, size_t len);
@@ -130,6 +132,15 @@ Packet0FPlayerBlockPlacement * Packet0FPlayerBlockPlacement_parse(char *data,
 								  size_t len);
 void Packet0FPlayerBlockPlacement_free(Packet0FPlayerBlockPlacement *data);
 /*
+ * Packet 0x10 Held Item Change
+ */
+typedef struct Packet10HeldItemChange {
+    short slot_id;
+} Packet10HeldItemChange;
+
+Packet10HeldItemChange * Packet10HeldItemChange_parse(char *data, size_t len);
+void Packet10HeldItemChange_free(Packet10HeldItemChange *data);
+/*
  * Packet 0x14 Spawn Named Entity
  */
 typedef struct Packet14SpawnNamedEntity {
@@ -203,6 +214,18 @@ typedef struct Packet35BlockChange {
 
 char * Packet35BlockChange_encode(Packet35BlockChange *data, size_t *len);
 void Packet35BlockChange_free(Packet35BlockChange *data);
+/*
+ * Packet 0x67 Set Slot
+ */
+typedef struct Packet67SetSlot {
+    char window_id;
+    short slot_id;
+    Slot *slot;
+} Packet67SetSlot;
+
+char * Packet67SetSlot_encode(Packet67SetSlot *data, size_t *len);
+// Packet67SetSlot_free is intentionally not implemented.
+// Since you will usually want to keep the *slot.
 
 /*
  * Packet 0xFF Disconnect

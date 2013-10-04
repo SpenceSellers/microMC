@@ -5,6 +5,7 @@
 #include "packets.h"
 #include "server.h"
 #include "map.h"
+#include "inventory.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -49,8 +50,12 @@ void *connection_thread(void *args){
     pthread_rwlock_rdlock(&server->map_lock);
     send_all_chunks(player, server->map);
     pthread_rwlock_unlock(&server->map_lock);
-    
+   
     send_all_players(player, server);
+
+    Player_set_slot(player, Slot_new_basic(3, 20, 0), 36);
+    Player_set_slot(player, Slot_new_basic(1, 20, 0), 37);
+    
     // General play loop.
     while (1){
 	ssize_t read = recv(sock, buffer, BUFFERSIZE, 0);
@@ -87,6 +92,10 @@ void *connection_thread(void *args){
 		Packet0FPlayerBlockPlacement_parse(buffer, read);
 	    handle_block_placement(pack, player, server);
 	    Packet0FPlayerBlockPlacement_free(pack);
+	} else if (buffer[0] == PACKET_HELD_ITEM_CHANGE){
+	    Packet10HeldItemChange *pack = Packet10HeldItemChange_parse(buffer, read);
+	    handle_item_change(pack, player, server);
+	    Packet10HeldItemChange_free(pack);
 	}
 	
     }

@@ -9,6 +9,12 @@
 #include <netinet/in.h>
 #include "map.h"
 
+void Player_free(Player *player){
+    close(player->socket);
+    free(player->username);
+    free(player);
+}
+
 void Player_disconnect(Player *player, char * reason){
     PacketFFDisconnect *disconnect = malloc(sizeof(PacketFFDisconnect));
     if (reason != NULL){
@@ -22,12 +28,6 @@ void Player_disconnect(Player *player, char * reason){
     PacketFFDisconnect_free(disconnect);
     free(packet);
     close(player->socket);
-}
-
-void Player_free(Player *player){
-    close(player->socket);
-    free(player->username);
-    free(player);
 }
 
 void Player_send_keep_alive(Player *player){
@@ -66,10 +66,14 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z){
 
 void Player_place_block(Player *player, Server *s, int x, int y, int z){
     logmsg(LOG_DEBUG, "Player is placing a block!");
-    Block dirt;
-    dirt.id = 2;
-    dirt.metadata = 0;
-    Server_change_block(s, dirt, x, y, z);
+    Block block;
+    Slot *slot = Player_get_held_slot(player);
+    if (Slot_is_empty(slot)) return;
+
+    block.id = slot->id;
+    block.metadata = slot->damage;
+    Server_change_block(s, block, x, y, z);
+    slot->count--;
 }
 
 void Player_send_message(Player *player, char *msg){
@@ -91,6 +95,13 @@ void Player_set_position(Player *player, double x, double y, double z){
     player->z = z;
 }
 
+void Player_send_slot(Player *player, Slot *slot, short slot_id){
+    Packet67SetSlot sets = {.window_id = 0, .slot_id = slot_id, slot};
+    size_t slotlen;
+    char *dat = Packet67SetSlot_encode(&sets, &slotlen);
+    send(player->socket, dat, slotlen, 0);
+    free(dat);
+}
 void Player_send_new_player(Player *player, Player *newplayer){
     
     Packet14SpawnNamedEntity *pack = malloc(sizeof(Packet14SpawnNamedEntity));
@@ -151,4 +162,13 @@ void Player_tick_lastlocation(Player *player){
     player->last_x = player->x;
     player->last_y = player->y;
     player->last_z = player->z;
+}
+
+void Player_set_slot(Player *player, Slot *slot, short slot_id){
+    Inventory_set(player->inventory, slot, slot_id);
+    Player_send_slot(player, slot, slot_id);
+}
+
+Slot *Player_get_held_slot(Player *player){
+    return Inventory_get(player->inventory, 36 + player->held_slot_num);
 }
