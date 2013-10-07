@@ -114,7 +114,7 @@ Player * handle_login(int sock, Server *s){
 
 void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
     printf("%s just broke a block.\n", p->username);
-    if (1){//packet->action == 2){
+    if (packet->action == 2){ // Finished Digging
 	pthread_rwlock_wrlock(&s->map_lock);
 	pthread_rwlock_wrlock(&s->players_lock);
 	pthread_rwlock_wrlock(&p->lock);
@@ -123,7 +123,7 @@ void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
 	pthread_rwlock_unlock(&s->map_lock);
 	pthread_rwlock_unlock(&s->players_lock);
     } else {
-        printf("action = %d \n", packet->action); 
+        //printf("action = %d \n", packet->action); 
     }
     
 }
