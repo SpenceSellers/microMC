@@ -11,7 +11,7 @@ endif
 
 
 OBJS = main.o logging.o connection.o player.o server.o map.o packets.o encodings.o \
-	playerconnectionhandlers.o inventory.o
+	playerconnectionhandlers.o inventory.o commands.o
 
 BINARY= microMC
 

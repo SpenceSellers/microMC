@@ -1,6 +1,8 @@
 #include "playerconnectionhandlers.h"
 #include "logging.h"
 #include "inventory.h"
+#include "commands.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,6 +38,7 @@ Player * handle_login(int sock, Server *s){
     Packet02Handshake_free(handshake);
 
     Player *player = malloc(sizeof(Player));
+    pthread_rwlock_init(&player->lock, NULL);
     player->username = playername;
     player->socket = sock;
     player->x = (double) s->spawnx;
@@ -113,7 +116,9 @@ void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
     if (1){//packet->action == 2){
 	pthread_rwlock_wrlock(&s->map_lock);
 	pthread_rwlock_wrlock(&s->players_lock);
+	pthread_rwlock_wrlock(&p->lock);
 	Player_break_block(p, s, packet->x, packet->y, packet->z);
+	pthread_rwlock_unlock(&p->lock);
 	pthread_rwlock_unlock(&s->map_lock);
 	pthread_rwlock_unlock(&s->players_lock);
     } else {
@@ -150,17 +155,20 @@ void send_all_players(Player *player, Server *server){
 	
 
 void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
+    if (packet->str[0] == '/'){
+	handle_command(p, s, packet->str);
+	return;
+    }
     pthread_rwlock_rdlock(&s->players_lock);
     Server_tell_all(s, packet->str);
     pthread_rwlock_unlock(&s->players_lock);
-    
-    if (strcmp(packet->str, "/kickme") == 0){
-	Player_disconnect(p, "Get outa here!");
-    }
+   
 }
 
 void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s){
+    pthread_rwlock_wrlock(&p->lock);
     Player_set_position(p, packet->x, packet->y, packet->z);
+    pthread_rwlock_unlock(&p->lock);
 }
 
 void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
@@ -171,10 +179,16 @@ void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
     int z = packet->z;
 
     apply_face(packet->direction, &x, &y, &z);
+    pthread_rwlock_wrlock(&p->lock);
+    pthread_rwlock_wrlock(&s->map_lock);
     Player_place_block(p, s, x,y,z);
+    pthread_rwlock_unlock(&s->map_lock);
+    pthread_rwlock_unlock(&p->lock);
 }
 
 void handle_item_change(Packet10HeldItemChange *packet, Player *p, Server *s){
     logmsg(LOG_DEBUG, "Player is changing slot.");
+    pthread_rwlock_wrlock(&p->lock);
     p->held_slot_num = packet->slot_id;
+    pthread_rwlock_unlock(&p->lock);
 }

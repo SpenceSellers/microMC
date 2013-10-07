@@ -7,6 +7,8 @@
 #include "inventory.h"
 typedef struct Server Server; // Cyclic Redundancy fix
 typedef struct Player {
+    pthread_rwlock_t lock;
+    
     char *username;
     int entity_id;
     int socket;
@@ -28,8 +30,13 @@ void Player_free(Player *player);
 
 void Player_disconnect(Player *player, char *reason);
 
+/* Player_break_block and Player_place_block will probably
+ * the server's map_lock will probably need to be locked for writing,
+ * Along with the player's own lock, as usual.
+ */
 void Player_break_block(Player *player, Server *s,  int x, int y, int z);
 void Player_place_block(Player *player, Server *s, int x, int y, int z);
+
 void Player_set_position(Player *player, double x, double y, double z);
 
 void Player_send_keep_alive(Player *player);
