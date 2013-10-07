@@ -97,6 +97,11 @@ void Player_set_position(Player *player, double x, double y, double z){
     player->z = z;
 }
 
+void Player_teleport(Player *player, double x, double y, double z){
+    Player_set_position(player, x, y, z);
+    Player_send_pos_and_look_update(player);
+}
+
 void Player_send_slot(Player *player, Slot *slot, short slot_id){
     Packet67SetSlot sets = {.window_id = 0, .slot_id = slot_id, slot};
     size_t slotlen;
@@ -131,6 +136,27 @@ void Player_send_inventory_update(Player *player){
     send(player->socket, pack, len, 0);
     free(pack);
 }
+
+void Player_send_pos_and_look_update(Player *player){
+    Packet0DPlayerPositionAndLook *pack =
+	malloc(sizeof(Packet0DPlayerPositionAndLook));
+
+    pack->x = player->x;
+    pack->y_stance = player->y + 1;
+    pack->stance_y = player->y;
+    pack->z = player->z;
+    pack->yaw = player->yaw;
+    pack->pitch = player->pitch;
+    pack->on_ground = 1;
+
+    size_t len;
+    char *data = Packet0DPlayerPositionAndLook_encode(pack, &len);
+    send(player->socket, data, len, 0);
+    Packet0DPlayerPositionAndLook_free(pack);
+    free(data);
+    
+}
+    
 void Player_send_player_position(Player *player, Player *other){
     if (other->x - other->last_x == 0.0 &&
 	other->y - other->last_y == 0.0 &&

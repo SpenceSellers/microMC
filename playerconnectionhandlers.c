@@ -44,7 +44,8 @@ Player * handle_login(int sock, Server *s){
     player->x = (double) s->spawnx;
     player->y = (double) s->spawny;
     player->z = (double) s->spawnz;
-
+    player->yaw = 0;
+    player->pitch = 0;
     player->inventory = Inventory_new_empty(45);
     player->held_slot_num = 0;
     

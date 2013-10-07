@@ -16,6 +16,10 @@ void command_give_stuff(Player *p, Server *s, char *cmd){
     Slot_free(slot);
 }
 
+void command_spawn(Player *p, Server *s, char *cmd){
+    Player_teleport(p, s->spawnx, s->spawny, s->spawnz);
+}
+
 void handle_command(Player *p, Server *s, char *cmd){
     char *first;
     char *remainder;
@@ -23,5 +27,7 @@ void handle_command(Player *p, Server *s, char *cmd){
 
     if (strcmp(first, "/kickme") == 0) command_kick_me(p, s, remainder);
     else if (strcmp(first, "/givestuff") == 0) command_give_stuff(p, s, remainder);
+    else if (strcmp(first, "/spawn") == 0) command_spawn(p, s, remainder);
+    else Player_send_message(p, "Unrecognized command!");
     
 }
