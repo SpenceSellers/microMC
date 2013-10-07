@@ -12,6 +12,7 @@
 void Player_free(Player *player){
     close(player->socket);
     free(player->username);
+    Inventory_free(player->inventory);
     free(player);
 }
 
@@ -56,12 +57,13 @@ void Player_send_block_change(Player *player, Block b, int x, int y, int z){
 
 void Player_break_block(Player *player, Server *s,  int x, int y, int z){
     logmsg(LOG_DEBUG, "Player has broken block!");
-    Block air;
-    air.id = 0;
-    air.metadata = 0;
-    //Map_set_block(s->map, air, x, y, z);
+    Block air = {.id = 0, .metadata = 0};
+    Block b = Map_get_block(s->map, x, y, z);
 
+    Slot *new_item = Slot_new_basic(b.id, 1, b.metadata);
     Server_change_block(s, air, x, y, z);
+    Player_give_slot(player, new_item);
+    free(new_item);
 }
 
 void Player_place_block(Player *player, Server *s, int x, int y, int z){
@@ -120,7 +122,15 @@ void Player_send_new_player(Player *player, Player *newplayer){
     Packet14SpawnNamedEntity_free(pack);
     free(packet);
 }
-
+void Player_send_inventory_update(Player *player){
+    Packet68SetWindowItems setwi;
+    setwi.window_id = 0; // Personal Inventory
+    setwi.inv = player->inventory;
+    size_t len;
+    char *pack = Packet68SetWindowItems_encode(&setwi, &len);
+    send(player->socket, pack, len, 0);
+    free(pack);
+}
 void Player_send_player_position(Player *player, Player *other){
     if (other->x - other->last_x == 0.0 &&
 	other->y - other->last_y == 0.0 &&
@@ -146,7 +156,7 @@ void Player_send_player_position(Player *player, Player *other){
     } else {
 	Packet1FEntityRelativeMove *pack =
 	    malloc(sizeof(Packet1FEntityRelativeMove));
-	pack->id = other->entity_id; //FIX
+	pack->id = other->entity_id;
 	pack->dx = to_fixed_point(other->x - other->last_x);
 	pack->dy = to_fixed_point(other->y - other->last_y);
 	pack->dz = to_fixed_point(other->z - other->last_z);
@@ -172,3 +182,14 @@ void Player_set_slot(Player *player, Slot *slot, short slot_id){
 Slot *Player_get_held_slot(Player *player){
     return Inventory_get(player->inventory, 36 + player->held_slot_num);
 }
+
+void Player_give_slot(Player *player, Slot *slot){
+    if (slot->id == 0) {
+	logmsg(LOG_WARN, "Tried to give the player a air block!");
+	return;
+    }
+    logmsg(LOG_DEBUG, "Giving a player an item.");
+    Inventory_player_add_item(player->inventory, slot);
+    Player_send_inventory_update(player);
+}
+

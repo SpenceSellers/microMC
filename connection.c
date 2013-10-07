@@ -53,8 +53,9 @@ void *connection_thread(void *args){
    
     send_all_players(player, server);
 
-    Player_set_slot(player, Slot_new_basic(3, 20, 0), 36);
-    Player_set_slot(player, Slot_new_basic(1, 20, 0), 37);
+    /*Player_give_slot(player, Slot_new_basic(3,20,0));
+    Player_give_slot(player, Slot_new_basic(1,20,0));
+    Player_give_slot(player, Slot_new_basic(3,5,0));*/
     
     // General play loop.
     while (1){

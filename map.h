@@ -42,6 +42,7 @@ Chunk * Map_get_chunk(Map *map, ssize_t x, ssize_t z);
 void Map_set_chunk(Map *map, Chunk *chunk, ssize_t x, ssize_t z);
 
 void Map_set_block(Map *map, Block block, int x, int y, int z);
+Block Map_get_block(Map *map, int x, int y, int z);
 
 void Map_set_below(Map *map, Block b, int level);
 /* Applies the "face" byte onto position coordinates.

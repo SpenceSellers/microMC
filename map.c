@@ -31,6 +31,7 @@ Block Chunk_get_block(Chunk *chunk, int x, int y, int z){
     size_t blockpos = y * 256 + z * 16 + x;
     return chunk->blocks[blockpos];
 }
+
 void Chunk_set_below(Chunk *chunk, Block b, int y){
     int x;
     int z;
@@ -105,7 +106,17 @@ void Map_set_block(Map *map, Block block, int x, int y, int z){
     }
     Chunk_set_block(chunk, x%16, y, z%16, block);
 }
+Block Map_get_block(Map *map, int x, int y, int z){
+    ssize_t chunkx = x / 16;
+    ssize_t chunkz = z / 16;
 
+    Chunk *chunk = Map_get_chunk(map, chunkx, chunkz);
+    if (chunk == NULL){
+	logmsg(LOG_WARN, "Tried to get block that is outside of map!");
+	return (Block) {.id = 0, .metadata = 0};
+    }
+    return Chunk_get_block(chunk, x%16, y, z%16);
+}
 void Map_set_below(Map *map, Block b, int level){
     int x = map->xchunks;
     int z = map->zchunks;

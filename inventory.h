@@ -16,8 +16,9 @@ void Slot_free(Slot *slot);
 char Slot_is_empty(Slot *slot);
 Slot * Slot_new_empty();
 Slot * Slot_new_basic(short id, char count, short damage);
-
+Slot * Slot_copy(Slot *slot);
 int Slot_can_add(Slot *slot, Slot *other);
+size_t Slot_encoded_size(Slot *slot);
 
 typedef struct Inventory {
     size_t size;
@@ -30,7 +31,6 @@ Inventory * Inventory_new_empty(size_t size);
  * You should remove or duplicate anything which you wish to keep
  * before freeing the inventory. */
 void Inventory_free(Inventory *i);
-size_t Slot_encoded_size(Slot *slot);
 
 /* Sets a slot in the inventory.
  *  This WILL free whatever was there before.*/

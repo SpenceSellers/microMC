@@ -21,6 +21,7 @@
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
 #define PACKET_SET_SLOT 0x67
+#define PACKET_SET_WINDOW_ITEMS 0x68
 #define PACKET_DISCONNECT 0xFF
 
 void debug_print_hex_string(char *str, size_t len);
@@ -226,6 +227,16 @@ typedef struct Packet67SetSlot {
 char * Packet67SetSlot_encode(Packet67SetSlot *data, size_t *len);
 // Packet67SetSlot_free is intentionally not implemented.
 // Since you will usually want to keep the *slot.
+
+/*
+ * Packet 0x68 Set Window Items
+ */
+typedef struct Packet68SetWindowItems {
+    char window_id;
+    Inventory *inv;
+} Packet68SetWindowItems;
+
+char * Packet68SetWindowItems_encode(Packet68SetWindowItems *data, size_t *len);
 
 /*
  * Packet 0xFF Disconnect

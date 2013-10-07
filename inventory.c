@@ -110,11 +110,45 @@ Slot * Slot_new_basic(short id, char count, short damage){
     return slot;
 }
 
+Slot * Slot_copy(Slot *slot){
+    logmsg(LOG_DEBUG, "Copying a slot.");
+    Slot *newslot = malloc(sizeof(Slot));
+    newslot->id = slot->id;
+    newslot->count = slot->count;
+    newslot->damage = slot->damage;
+    newslot->nbt_len = slot->nbt_len;
+    if (newslot->nbt_len != -1){
+	char *newnbt = malloc(sizeof(char) * newslot->nbt_len);
+	memcpy(newnbt, slot->nbt, newslot->nbt_len);
+	newslot->nbt = newnbt;
+    }
+    logmsg(LOG_DEBUG, "Done copying slot.");
+    return newslot;
+}
+	
 int Slot_can_add(Slot *slot, Slot *other){
     if (slot->id != other->id) return 0;
     if (slot->damage != other->damage) return 0;
     if (slot->count + other->count > 64) return 0;
     return 1;
+}
+
+void Slot_add(Slot *slot, Slot *other){
+    if (slot == NULL || other == NULL){
+	logmsg(LOG_WARN, "Slot_add should not be used with NULL slots!");
+	return;
+    }
+    if (slot->id != other->id) return;
+    if (slot->damage != other->damage) return;
+    int max_added = 64 - slot->count;
+    if (other->count <= max_added){
+	slot->count += other->count;
+	other->count = 0;
+    } else {
+	slot->count += max_added;
+	other->count -= max_added;
+    }
+    
 }
 
 Inventory * Inventory_new_empty(size_t size){
@@ -129,7 +163,16 @@ Inventory * Inventory_new_empty(size_t size){
     return i;
 }
 
-
+void Inventory_free(Inventory *inv){
+    for (int i=0; i < inv->size; i++){
+	Slot *s = Inventory_get(inv, i);
+	if (s != NULL){
+	    Slot_free(s);
+	}
+    }
+    free(inv->slots);
+    free(inv);
+}
 void Inventory_set(Inventory *inv, Slot *slot, size_t index){
     if (index > inv->size - 1){
 	logmsg(LOG_WARN, "Tried to set invalid slot index!");
@@ -148,9 +191,13 @@ int Inventory_player_add_item(Inventory *inv, Slot *slot){
     int i;
     for (i=36; i < 45; i++){
 	if (Slot_is_empty(inv->slots[i])){
-	    Inventory_set(inv, slot, i);
+	    Inventory_set(inv, Slot_copy(slot), i);
+	    slot->count = 0;
+	    slot->id = -1;
 	    return 1;
 	}
+        Slot_add(Inventory_get(inv, i), slot);
+	if (Slot_is_empty(slot)) return 1;
     }
     return 0;
     

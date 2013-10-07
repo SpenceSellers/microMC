@@ -477,7 +477,39 @@ char * Packet67SetSlot_encode(Packet67SetSlot *data, size_t *len){
     free(slotdata);
     return packet;
 }
-
+/*
+ * Packet 0x68 Set Window Items
+ */
+char * Packet68SetWindowItems_encode(Packet68SetWindowItems *data, size_t *len){
+    size_t size = 4; // 1 for ID, 1 for Window ID, 2 for length
+    Slot *empty = Slot_new_empty();
+    size_t emptysize = Slot_encoded_size(empty);
+    free(empty);
+    for (int i = 0; i < data->inv->size; i++){
+	Slot *s = Inventory_get(data->inv, i);
+	if (s == NULL){
+	    size += emptysize;
+	} else {
+	    size += Slot_encoded_size(s);
+	}
+    }
+    char *packet = malloc(sizeof(char) * size);
+    size_t pos = 0;
+    pos += write_char(PACKET_SET_WINDOW_ITEMS, packet+pos);
+    pos += write_char(data->window_id, packet+pos);
+    pos += write_short(data->inv->size, packet+pos);
+    for (int i= 0; i < data->inv->size; i++){
+	size_t slotlen;
+	char * slotdata = Slot_encode(Inventory_get(data->inv, i), &slotlen);
+	memcpy(packet+pos, slotdata, slotlen);
+	pos += slotlen;
+	free(slotdata);
+    }
+    *len = pos;
+    return packet;
+}
+    
+   
 /*
  * Packet 0xFF Disconnect
  */
