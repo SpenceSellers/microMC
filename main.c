@@ -14,19 +14,34 @@
 #include "server.h"
 #include "map.h"
 
+#define DEFAULT_X_SIZE 5
+#define DEFAULT_Z_SIZE 5
+
 // Global variable for signal handling only!
 static Server *sigint_server;
 
 static void catch_sigint(int signal){
     logmsg(LOG_WARN, "Shutting down due to quit signal!");
+    
     Server_shutdown(sigint_server);
     exit(0);
     
 }
-int main(){
+int main(int argc, char *argv[]){
     logging_init();
     logmsg(LOG_INFO, "Server started and logging started.");
-    Map *map = Map_new_air(5,5);
+    int xsize = DEFAULT_X_SIZE;
+    int zsize = DEFAULT_Z_SIZE;
+	
+    for(int i=0; i < argc; i++){
+	if (strcmp("-s", argv[i])== 0){
+	    xsize = atoi(argv[i+1]);
+	    zsize = atoi(argv[i+2]);
+	    i += 2;
+	}
+    }
+    
+    Map *map = Map_new_air(xsize,zsize);
     Block b;
     b.id = 1;
     b.metadata = 0;

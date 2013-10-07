@@ -1,6 +1,6 @@
 #include "map.h"
 #include "logging.h"
-
+#include <stdio.h>
 #define DEFAULT_BIOME 1
 
 Chunk * Chunk_new_empty(){
@@ -127,6 +127,57 @@ void Map_set_below(Map *map, Block b, int level){
 	    Chunk_set_below(Map_get_chunk(map, i, j), b, level);
 	}
     }
+}
+
+void Map_write(Map *map, char *fname){
+    FILE *f = fopen(fname, "wb");
+    int xsize = map->xchunks;
+    int zsize = map->zchunks;
+    
+    fwrite(&xsize, sizeof(int), 1, f);
+    fwrite(&zsize, sizeof(int), 1, f);
+
+    for (int xchunk = 0; xchunk < xsize; xchunk++){
+	for (int zchunk = 0; zchunk < zsize; zchunk++){
+	    Chunk *chunk = Map_get_chunk(map, xsize, zsize);
+	    for (int blockpos = 0; blockpos < 16*16*256; blockpos++){
+		Block b = chunk->blocks[blockpos];
+		char id = b.id;
+		char meta = b.metadata;
+
+		fwrite(&id, sizeof(char), 1, f);
+		fwrite(&meta, sizeof(char), 1, f);
+	    }
+	}
+    }
+}
+Map * Map_read(char *fname){
+    FILE *f = fopen(fname, "rb");
+    int xsize;
+    int zsize;
+
+    fread(&xsize, sizeof(int), 1, f);
+    fread(&zsize, sizeof(int), 1, f);
+
+    Map *map = Map_new_empty(xsize, zsize);
+
+    for (int xchunk = 0; xchunk < xsize; xchunk++){
+	for (int zchunk = 0; zchunk < zsize; zchunk++){
+	    
+	    Chunk *chunk = Map_get_chunk(map, xchunk, zchunk);
+	    for (int blockpos = 0; blockpos < 16*16*256; blockpos++){
+		
+		char id;
+		char meta;
+		fread(&id, sizeof(char), 1, f);
+		fread(&meta, sizeof(char), 1, f);
+		Block b = {.id = id, .metadata = meta};
+		chunk->blocks[blockpos] = b;
+	    }
+	    
+	}
+    }
+    return map;
 }
 
 void apply_face(char face, int *x, int *y, int *z){
