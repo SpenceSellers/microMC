@@ -13,12 +13,18 @@ void command_kick_me(Player *p, Server *s, char *cmd){
 
 void command_give_stuff(Player *p, Server *s, char *cmd){
     Slot *slot = Slot_new_basic(5, 64, 0);
+    
+    pthread_rwlock_wrlock(&p->lock);
     Player_give_slot(p, slot);
+    pthread_rwlock_unlock(&p->lock);
+    
     Slot_free(slot);
 }
 
 void command_spawn(Player *p, Server *s, char *cmd){
+    pthread_rwlock_wrlock(&p->lock);
     Player_teleport(p, s->spawnx, s->spawny, s->spawnz);
+    pthread_rwlock_unlock(&p->lock);
 }
 
 void command_item(Player *p, Server *s, char *cmd){

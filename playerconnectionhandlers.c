@@ -160,8 +160,17 @@ void handle_player_chat(Packet03ChatMessage *packet, Player *p, Server *s){
 	handle_command(p, s, packet->str);
 	return;
     }
+    char buffer[256]; // Maximum minecraft string length is 240 characters.
+    buffer[0] = 0;
+    char *begin_name = "[";
+    char *end_name = "] ";
+    strcat(buffer, begin_name);
+    strcat(buffer, p->username);
+    strcat(buffer, end_name);
+    strcat(buffer, packet->str);
+    
     pthread_rwlock_rdlock(&s->players_lock);
-    Server_tell_all(s, packet->str);
+    Server_tell_all(s, buffer);
     pthread_rwlock_unlock(&s->players_lock);
    
 }
