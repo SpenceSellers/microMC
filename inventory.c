@@ -76,11 +76,12 @@ char * Slot_encode(Slot *slot, size_t *len){
 }
 	
 size_t Slot_encoded_size(Slot *slot){
-    return SIZE_SHORT + SIZE_BYTE + SIZE_SHORT + SIZE_SHORT + slot->nbt_len;
+    size_t nbtlen = slot->nbt_len == -1 ? 0 : slot->nbt_len;
+    return SIZE_SHORT + SIZE_BYTE + SIZE_SHORT + SIZE_SHORT + nbtlen;
 }
 
 void Slot_free(Slot *slot){
-    if (slot->nbt != NULL) free(slot->nbt);
+    if (slot->nbt_len != -1) free(slot->nbt);
     free(slot);
 }
 
@@ -118,6 +119,7 @@ Slot * Slot_copy(Slot *slot){
     newslot->damage = slot->damage;
     newslot->nbt_len = slot->nbt_len;
     if (newslot->nbt_len != -1){
+	logmsg(LOG_DEBUG, "Copying NBT Data!");
 	char *newnbt = malloc(sizeof(char) * newslot->nbt_len);
 	memcpy(newnbt, slot->nbt, newslot->nbt_len);
 	newslot->nbt = newnbt;
@@ -178,12 +180,16 @@ void Inventory_set(Inventory *inv, Slot *slot, size_t index){
 	logmsg(LOG_WARN, "Tried to set invalid slot index!");
 	return;
     }
-    Slot *old = inv->slots[index];
+    Slot *old = Inventory_get(inv, index);
     if (old != NULL) Slot_free(old);
 
     inv->slots[index] = slot;
 }
 Slot *Inventory_get(Inventory *inv, size_t index){
+    if (index >= inv->size || index < 0) {
+	logmsg(LOG_WARN, "Tried to get inventory item of invalid index!");
+	return NULL;
+    }
     return inv->slots[index];
 }
 int Inventory_player_add_item(Inventory *inv, Slot *slot){
