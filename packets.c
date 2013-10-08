@@ -174,7 +174,26 @@ Packet0BPlayerPosition * Packet0BPlayerPosition_parse(char *data, size_t len){
 void Packet0BPlayerPosition_free(Packet0BPlayerPosition *data){
     free(data);
 }
-	
+/*
+ * Packet 0x0C Player Look
+ */
+Packet0CPlayerLook * Packet0CPlayerLook_parse(char *data, size_t len){
+    Packet0CPlayerLook *pack = malloc(sizeof(Packet0CPlayerLook));
+    size_t pos = 0;
+
+    if (read_char(data + pos, &pos) != PACKET_PLAYER_LOOK){
+	logmsg(LOG_WARN, "This is not a Player Look!");
+	return NULL;
+    }
+
+    pack->yaw = read_float(data+pos, &pos);
+    pack->pitch = read_float(data+pos, &pos);
+    return pack;
+}
+
+void Packet0CPlayerLook_free(Packet0CPlayerLook *data){
+    free(data);
+}
 /*
  * Packet 0x0D Player Position and Look
  */

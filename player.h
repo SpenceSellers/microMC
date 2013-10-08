@@ -44,7 +44,7 @@ void Player_place_block(Player *player, Server *s, int x, int y, int z);
  * position to the client. This function should only be used when
  * the client already knows where they are.*/
 void Player_set_position(Player *player, double x, double y, double z);
-
+void Player_set_look(Player *player, float yaw, float pitch);
 /* This is used to move the player to a new location for reasons which
  * the client DOESN'T expect. This will send the new location to the client.
  */

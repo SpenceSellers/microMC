@@ -96,7 +96,10 @@ void Player_set_position(Player *player, double x, double y, double z){
     player->y = y;
     player->z = z;
 }
-
+void Player_set_look(Player *player, float yaw, float pitch){
+    player->yaw = yaw;
+    player->pitch = pitch;
+}
 void Player_teleport(Player *player, double x, double y, double z){
     Player_set_position(player, x, y, z);
     Player_send_pos_and_look_update(player);

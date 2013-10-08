@@ -11,12 +11,14 @@
 #define PACKET_CHAT_MESSAGE 0x03
 #define PACKET_SPAWN_POSITION 0x06
 #define PACKET_PLAYER_POSITION 0x0B
+#define PACKET_PLAYER_LOOK 0x0C
 #define PACKET_PLAYER_POSITION_AND_LOOK 0x0D
 #define PACKET_PLAYER_DIGGING 0x0E
 #define PACKET_PLAYER_BLOCK_PLACEMENT 0x0F
 #define PACKET_HELD_ITEM_CHANGE 0x10
 #define PACKET_SPAWN_NAMED_ENTITY 0x14
 #define PACKET_ENTITY_RELATIVE_MOVE 0x1F
+#define PACKET_ENTITY_LOOK 0x20
 #define PACKET_ENTITY_TELEPORT 0x22
 #define PACKET_CHUNK_DATA 0x33
 #define PACKET_BLOCK_CHANGE 0x35
@@ -96,7 +98,20 @@ typedef struct Packet0DPlayerPositionAndLook {
     float pitch;
     char on_ground;
 } Packet0DPlayerPositionAndLook;
+/*
+ * Packet 0x0C Player Look
+ */
+typedef struct Packet0CPlayerLook {
+    float yaw;
+    float pitch;
+} Packet0CPlayerLook;
 
+Packet0CPlayerLook *Packet0CPlayerLook_parse(char *data, size_t len);
+void Packet0CPlayerLook_free(Packet0CPlayerLook *data);
+
+/*
+ * Packet 0x0D Player Position and look
+ */
 char * Packet0DPlayerPositionAndLook_encode(Packet0DPlayerPositionAndLook *data,
 					    size_t *len);
 void Packet0DPlayerPositionAndLook_free(Packet0DPlayerPositionAndLook *data);
@@ -172,9 +187,17 @@ typedef struct Packet1FEntityRelativeMove {
 char * Packet1FEntityRelativeMove_encode(Packet1FEntityRelativeMove *data,
 					 size_t *len);
 void Packet1FEntityRelativeMove_free(Packet1FEntityRelativeMove *data);
-
 /*
- * Packet 0x1F Entity Teleport
+ * Packet 0x20 Entity Look
+ */
+typedef struct Packet20EntityLook {
+    char yaw;
+    char pitch;
+} Packet20EntityLook;
+
+char * Packet20EntityLook_encode(Packet20EntityLook *data, size_t *len); 
+/*
+ * Packet 0x22 Entity Teleport
  */
 typedef struct Packet22EntityTeleport {
     int id;

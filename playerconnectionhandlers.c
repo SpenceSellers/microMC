@@ -181,6 +181,11 @@ void handle_player_position(Packet0BPlayerPosition *packet, Player *p, Server *s
     pthread_rwlock_unlock(&p->lock);
 }
 
+void handle_player_look(Packet0CPlayerLook *packet, Player *p, Server *s){
+
+
+}
+
 void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
 			    Player *p, Server *s){
     logmsg(LOG_DEBUG, "Player is placing block!");

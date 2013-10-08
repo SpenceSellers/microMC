@@ -88,6 +88,11 @@ void *connection_thread(void *args){
 	    handle_player_position(pack, player, server);
 	    Packet0BPlayerPosition_free(pack);
 	    
+	} else if (buffer[0] == PACKET_PLAYER_LOOK){
+	    Packet0CPlayerLook *pack =
+		Packet0CPlayerLook_parse(buffer, read);
+	    handle_player_look(pack, player, server);
+	    Packet0CPlayerLook_free(pack);
 	} else if (buffer[0] == PACKET_PLAYER_BLOCK_PLACEMENT){
 	    Packet0FPlayerBlockPlacement *pack =
 		Packet0FPlayerBlockPlacement_parse(buffer, read);
