@@ -45,8 +45,12 @@ void Map_set_block(Map *map, Block block, int x, int y, int z);
 Block Map_get_block(Map *map, int x, int y, int z);
 
 void Map_set_below(Map *map, Block b, int level);
+
+
+void Map_write(Map *map, char *fname);
+Map * Map_read(char *fname);
+
 /* Applies the "face" byte onto position coordinates.
- * These WILL probably need to be checked for santiy afterwards.
- */
+ * These WILL probably need to be checked for santiy afterwards.*/
 void apply_face(char face, int *x, int *y, int *z);
 #endif

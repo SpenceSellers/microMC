@@ -26,7 +26,7 @@ typedef struct Server {
     
     pthread_rwlock_t map_lock;
     Map *map;
-
+    char *filename;
     /* The thread which spawns new connections.
      * There is no lock because only the main thread
      * should ever need to touch it. */

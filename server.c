@@ -30,8 +30,8 @@ Server * Server_create(Map *map, size_t max_players){
     server->players = malloc(sizeof(Player*) * max_players);
     
     server->map = map;
-
     pthread_rwlock_init( &(server->map_lock), NULL);
+    server->filename = NULL;
 
     server->distributor_thread = 0;
     
@@ -130,9 +130,11 @@ void Server_shutdown(Server *server){
     int i;
     for(i=0; i < server->num_players; i++){
 	Player_disconnect(server->players[i], "Server shutting down!");
-	Player_free(server->players[i]);
     }
     close(server->distributor_socket);
+    if (server->filename != NULL){
+	Map_write(server->map, server->filename);
+    }
 }
 
 void Server_change_block(Server *server, Block b, int x, int y, int z){

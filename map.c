@@ -130,6 +130,7 @@ void Map_set_below(Map *map, Block b, int level){
 }
 
 void Map_write(Map *map, char *fname){
+    logmsg(LOG_INFO, "Writing map.");
     FILE *f = fopen(fname, "wb");
     int xsize = map->xchunks;
     int zsize = map->zchunks;
@@ -139,7 +140,7 @@ void Map_write(Map *map, char *fname){
 
     for (int xchunk = 0; xchunk < xsize; xchunk++){
 	for (int zchunk = 0; zchunk < zsize; zchunk++){
-	    Chunk *chunk = Map_get_chunk(map, xsize, zsize);
+	    Chunk *chunk = Map_get_chunk(map, xchunk, zchunk);
 	    for (int blockpos = 0; blockpos < 16*16*256; blockpos++){
 		Block b = chunk->blocks[blockpos];
 		char id = b.id;
@@ -150,8 +151,10 @@ void Map_write(Map *map, char *fname){
 	    }
 	}
     }
+    fclose(f);
 }
 Map * Map_read(char *fname){
+    logmsg(LOG_INFO, "Reading map.");
     FILE *f = fopen(fname, "rb");
     int xsize;
     int zsize;
@@ -159,12 +162,15 @@ Map * Map_read(char *fname){
     fread(&xsize, sizeof(int), 1, f);
     fread(&zsize, sizeof(int), 1, f);
 
+    printf("Size of map is: %d %d \n", xsize, zsize);
+
     Map *map = Map_new_empty(xsize, zsize);
 
     for (int xchunk = 0; xchunk < xsize; xchunk++){
 	for (int zchunk = 0; zchunk < zsize; zchunk++){
 	    
-	    Chunk *chunk = Map_get_chunk(map, xchunk, zchunk);
+	    Chunk *chunk = Chunk_new_empty();
+	    Map_set_chunk(map, chunk, xchunk, zchunk);
 	    for (int blockpos = 0; blockpos < 16*16*256; blockpos++){
 		
 		char id;
@@ -174,9 +180,9 @@ Map * Map_read(char *fname){
 		Block b = {.id = id, .metadata = meta};
 		chunk->blocks[blockpos] = b;
 	    }
-	    
 	}
     }
+    fclose(f);
     return map;
 }
 
