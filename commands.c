@@ -28,30 +28,23 @@ void command_spawn(Player *p, Server *s, char *cmd){
 }
 
 void command_item(Player *p, Server *s, char *cmd){
-    /* Ok, this function use a Goto for error handling.
-     * Donald Knuth supports goto for this purpose.
-     * The Linux Kernel uses goto for this purpose.
-     * Read:
-     * http://eli.thegreenplace.net/2009/04/27/using-goto-for-error-handling-in-c/
-     */
-    char *token;
-    char *remainder;
-    token = strtok_r(cmd, " ", &remainder);
-    if (token == NULL) goto args_error;
-    int id = atoi(token);
-    
-    token = strtok_r(NULL, " ", &remainder);
-    if (token == NULL) goto args_error;
-    int count = atoi(token);
-
-    Slot *slot = Slot_new_basic(id, count, 0);
+    int id;
+    int count;
+    int metadata;
+    int read = sscanf(cmd, "%d %d %d", &id, &count, &metadata);
+    Slot *slot;
+    if (read == 1){
+	slot = Slot_new_basic(id, 64, 0);
+    } else if (read == 2){
+	slot = Slot_new_basic(id, count, 0);
+    } else if (read == 3){
+	slot = Slot_new_basic(id, count, metadata);
+    } else {
+	Player_send_message(p, "Invalid number of arguments!");
+	return;
+    }
     Player_give_slot(p, slot);
-    free(slot);
-    return;
-
-args_error:
-    Player_send_message(p, "Invalid number of arguments!");
-    return;
+    free(slot); 
 }
 
     
