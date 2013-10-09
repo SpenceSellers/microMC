@@ -113,7 +113,7 @@ Player * handle_login(int sock, Server *s){
 }
 
 void handle_player_digging(Packet0EPlayerDigging *packet, Player *p, Server *s){
-    printf("%s just broke a block.\n", p->username);
+    logfmt(LOG_DEBUG, "%s just broke a block.\n", p->username);
     if (packet->action == 2){ // Finished Digging
 	pthread_rwlock_wrlock(&s->map_lock);
 	pthread_rwlock_wrlock(&s->players_lock);
@@ -188,7 +188,7 @@ void handle_player_look(Packet0CPlayerLook *packet, Player *p, Server *s){
 
 void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
 			    Player *p, Server *s){
-    logmsg(LOG_DEBUG, "Player is placing block!");
+    logfmt(LOG_DEBUG, "Player: %s is placing block!", p->username);
     int x = packet->x;
     int y = packet->y;
     int z = packet->z;
@@ -202,7 +202,7 @@ void handle_block_placement(Packet0FPlayerBlockPlacement *packet,
 }
 
 void handle_item_change(Packet10HeldItemChange *packet, Player *p, Server *s){
-    logmsg(LOG_DEBUG, "Player is changing slot.");
+    logfmt(LOG_DEBUG, "Player:  is changing slot.", p->username);
     pthread_rwlock_wrlock(&p->lock);
     p->held_slot_num = packet->slot_id;
     pthread_rwlock_unlock(&p->lock);

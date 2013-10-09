@@ -13,7 +13,7 @@
 // The current logging level.
 #define LOGGING_LEVEL 3
 
-void logmsg(int level, char *message); 
-
+void logmsg(int level, const char *message); 
+void logfmt(int level, const char *fmt, ...);
 void logging_init();
 #endif

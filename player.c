@@ -67,7 +67,7 @@ void Player_break_block(Player *player, Server *s,  int x, int y, int z){
 }
 
 void Player_place_block(Player *player, Server *s, int x, int y, int z){
-    logmsg(LOG_DEBUG, "Player is placing a block!");
+    logfmt(LOG_DEBUG, "Player is placing a block at %d %d %d", x, y, z);
     Block block;
     Slot *slot = Player_get_held_slot(player);
     if (Slot_is_empty(slot)) return;

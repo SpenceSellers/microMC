@@ -168,7 +168,6 @@ char * fake_json_chat(char *str){
     strcat(fake_json, before);
     strcat(fake_json, str);
     strcat(fake_json, after);
-    printf("Fake json: %s \n", fake_json);
     return fake_json;
 }
     

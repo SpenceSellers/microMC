@@ -55,7 +55,7 @@ int get_index_of_player(Server *server, Player *player){
 }
 
 void Server_add_player(Server *server, Player *player){
-    logmsg(LOG_INFO, "Adding new player to the server!");
+    logmsg(LOG_DEBUG, "Adding new player to the server.");
     if (Server_is_full(server)) {
 	logmsg(LOG_WARN, "Attempted to add more players than is allowed!");
 	return;
@@ -64,7 +64,6 @@ void Server_add_player(Server *server, Player *player){
     server->players[server->num_players] = player;
     server->num_players++;
 
-    printf("The entity ID is %d \n", player->entity_id);
     int i;
     for (i=0; i < server->num_players; i++){
 	if (server->players[i] == player) continue;
@@ -78,7 +77,7 @@ void Server_add_player(Server *server, Player *player){
 }
 
 void Server_remove_player(Server *server, Player *player){
-    logmsg(LOG_INFO, "Removing player from server.");
+    logfmt(LOG_INFO, "Removing Player: %s from server.", player->username);
     int index = get_index_of_player(server, player);
     
     // Time to shift all of the other players over by one..
@@ -138,7 +137,7 @@ void Server_shutdown(Server *server){
 }
 
 void Server_change_block(Server *server, Block b, int x, int y, int z){
-    logmsg(LOG_DEBUG, "A block is being changed.");
+    logfmt(LOG_DEBUG, "Block is being changed: %d %d %d", x, y, z);
     Map_set_block(server->map, b, x, y, z);
     int i;
     for (i=0; i < server->num_players; i++){

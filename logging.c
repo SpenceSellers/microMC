@@ -1,9 +1,13 @@
 #include "logging.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
+#define LOGFMT_BUFFER_SIZE 512
 pthread_mutex_t log_mutex;
 
 
-void logmsg(int level, char *message){
+void logmsg(int level, const char *message){
     if (level <= LOGGING_LEVEL){
 	char *level_string;
 	switch (level){
@@ -24,6 +28,15 @@ void logmsg(int level, char *message){
 	printf("%s %s \n", level_string, message);
 	pthread_mutex_unlock(&log_mutex);
     }
+}
+
+void logfmt(int level, const char *fmt, ...){
+    char buffer[LOGFMT_BUFFER_SIZE];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buffer, LOGFMT_BUFFER_SIZE, fmt, args);
+    va_end(args);
+    logmsg(level, buffer);
 }
 
 void logging_init(){

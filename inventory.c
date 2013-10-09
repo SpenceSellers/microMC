@@ -9,7 +9,6 @@ Slot * Slot_read(char *data, size_t *read){
     Slot *slot = malloc(sizeof(Slot));
     size_t pos = 0;
     slot->id = read_short(data+pos, &pos);
-    printf("Item ID is %d\n", slot->id);
     if (slot->id == -1){
 	slot->count = 0;
 	slot->damage = 0;
@@ -18,11 +17,9 @@ Slot * Slot_read(char *data, size_t *read){
 	*read = pos;
 	return slot;
     }
-    printf("Continuing!\n");
     slot->count = read_char(data+pos, &pos);
     slot->damage = read_short(data+pos, &pos);
     slot->nbt_len = read_short(data+pos, &pos);
-    printf("NBT len is %d \n", slot->nbt_len);
     if (slot->nbt_len == -1){
 	slot->nbt = NULL;
 	*read = pos;
@@ -37,6 +34,7 @@ Slot * Slot_read(char *data, size_t *read){
 }
 
 char * Slot_encode(Slot *slot, size_t *len){
+    logmsg(LOG_DEBUG, "Encoding slot.");
     if (slot == NULL){
 	Slot *emptyslot = Slot_new_empty();
         char *data = Slot_encode(emptyslot, len);

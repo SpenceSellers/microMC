@@ -130,7 +130,7 @@ void Map_set_below(Map *map, Block b, int level){
 }
 
 void Map_write(Map *map, char *fname){
-    logmsg(LOG_INFO, "Writing map.");
+    logfmt(LOG_INFO, "Writing map: %s", fname);
     FILE *f = fopen(fname, "wb");
     int xsize = map->xchunks;
     int zsize = map->zchunks;
@@ -154,16 +154,14 @@ void Map_write(Map *map, char *fname){
     fclose(f);
 }
 Map * Map_read(char *fname){
-    logmsg(LOG_INFO, "Reading map.");
+    logfmt(LOG_INFO, "Reading map: %s", fname);
     FILE *f = fopen(fname, "rb");
     int xsize;
     int zsize;
 
     fread(&xsize, sizeof(int), 1, f);
     fread(&zsize, sizeof(int), 1, f);
-
-    printf("Size of map is: %d %d \n", xsize, zsize);
-
+    logfmt(LOG_DEBUG, "Map is of size %d %d", xsize, zsize); 
     Map *map = Map_new_empty(xsize, zsize);
 
     for (int xchunk = 0; xchunk < xsize; xchunk++){

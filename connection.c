@@ -42,6 +42,7 @@ void *connection_thread(void *args){
 	close(sock);
 	pthread_exit(NULL);
     } else {
+	logfmt(LOG_INFO, "Player: %s connected!", player->username);
 	pthread_rwlock_wrlock(&server->players_lock);
 	Server_add_player(server, player);
 	pthread_rwlock_unlock(&server->players_lock);
